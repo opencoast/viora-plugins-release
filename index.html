@@ -1,0 +1,1491 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Viora is a personal media library for photos, video, comics and novels. Your files stay on disk. The same server runs on this computer or a NAS.">
+<title>Viora — your personal media library</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='15 40 170 122'%3E%3Cpath d='M40 43 L97 134 A3.5 3.5 0 0 0 103 134 L160 43' fill='none' stroke='%238f7350' stroke-width='22' stroke-linejoin='round'/%3E%3Cpath d='M24 48 L83 143 A20 20 0 0 0 117 143 L176 48' fill='none' stroke='%23b8912c' stroke-width='11' stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;0,9..144,900;1,9..144,600&family=Hanken+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<style>
+:root{
+  --wall:#f3f1eb; --wall-2:#eae7df; --surface:#fdfbf6; --stage:#e7e4dc;
+  --ink:#242229; --ink-2:#494651; --ink-3:#5f5c66; --faint:#77747d;
+  --line:#ddd8cd; --line-2:#cfc9bb;
+  --gold:#836109; --gold-deep:#6b4e07;
+  --board-hi:#b8912c; --board-lo:#836109;
+  --page:#8f7350; --page-line:#6b4e07; --gutter:#5a4010;
+  --page-face:#f7f1e4; --page-back:#ebe2cf;
+  --accent:#836109; --focus:#9b7109;
+  --spot:rgba(131,97,9,.09);
+  --shadow:0 1px 2px rgba(40,34,20,.05), 0 18px 44px -22px rgba(40,34,20,.28);
+  color-scheme:light;
+}
+:root:not([data-theme="light"]){
+  @media (prefers-color-scheme: dark){
+    --wall:#111217; --wall-2:#16171c; --surface:#1a1b20; --stage:#0c0d10;
+    --ink:#f2efe8; --ink-2:#c9c7c0; --ink-3:#a7a5a0; --faint:#8b8990;
+    --line:#2b2c33; --line-2:#3a3b44;
+    --gold:#d6ae42; --gold-deep:#b8912c;
+    --board-hi:#dcb44c; --board-lo:#b8912c;
+    --page:#ecdfc0; --page-line:#d8c7a2; --gutter:#bda980;
+    --page-face:#f4efe6; --page-back:#e4d9c4;
+    --accent:#d6ae42; --focus:#e8c25e;
+    --spot:rgba(214,174,66,.16);
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 26px 60px -28px rgba(0,0,0,.7);
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --wall:#111217; --wall-2:#16171c; --surface:#1a1b20; --stage:#0c0d10;
+  --ink:#f2efe8; --ink-2:#c9c7c0; --ink-3:#a7a5a0; --faint:#8b8990;
+  --line:#2b2c33; --line-2:#3a3b44;
+  --gold:#d6ae42; --gold-deep:#b8912c;
+  --board-hi:#dcb44c; --board-lo:#b8912c;
+  --page:#ecdfc0; --page-line:#d8c7a2; --gutter:#bda980;
+  --page-face:#f4efe6; --page-back:#e4d9c4;
+  --accent:#d6ae42; --focus:#e8c25e;
+  --spot:rgba(214,174,66,.16);
+  --shadow:0 1px 2px rgba(0,0,0,.4), 0 26px 60px -28px rgba(0,0,0,.7);
+  color-scheme:dark;
+}
+
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%; scroll-padding-top:4.5rem}
+body{
+  margin:0; background:var(--wall); color:var(--ink);
+  font-family:"Hanken Grotesk",system-ui,-apple-system,sans-serif;
+  font-size:clamp(1rem,.96rem + .2vw,1.08rem); line-height:1.62;
+  -webkit-font-smoothing:antialiased; overflow-x:hidden;
+}
+h1,h2,h3{font-family:"Fraunces",Georgia,serif; font-weight:900; line-height:1.02; letter-spacing:-.012em; text-wrap:balance; margin:0}
+p{margin:0}
+a{color:inherit}
+::selection{background:color-mix(in srgb,var(--accent) 28%,transparent)}
+.wrap{width:min(1120px,92vw); margin-inline:auto}
+.eyebrow{
+  font-family:"IBM Plex Mono",ui-monospace,monospace; font-weight:600;
+  font-size:.72rem; letter-spacing:.24em; text-transform:uppercase; color:var(--gold); margin:0;
+}
+.lede{color:var(--ink-2); font-size:clamp(1.05rem,1rem + .5vw,1.28rem); line-height:1.6; max-width:40ch}
+:where(a,button):focus-visible{outline:2px solid var(--focus); outline-offset:3px; border-radius:4px}
+code{font-family:"IBM Plex Mono",ui-monospace,monospace; font-size:.86em}
+
+.nav{
+  position:sticky; top:0; z-index:30;
+  background:var(--wall);
+  border-bottom:1px solid var(--line);
+}
+.nav-inner{width:min(1120px,92vw); margin-inline:auto; display:flex; align-items:center; justify-content:space-between; gap:1rem; min-height:3.6rem}
+.brand-row{display:flex; align-items:center; gap:.7rem; flex:none}
+.brand{display:flex; align-items:center; gap:.6rem; text-decoration:none; font-family:"Fraunces",serif; font-weight:900; font-size:1.2rem}
+.brand svg{width:36px; height:26px; flex:none}
+.ver{
+  display:inline-flex; align-items:baseline; gap:.4rem; flex:none;
+  font-family:"IBM Plex Mono",monospace; font-size:.68rem; letter-spacing:.04em; line-height:1;
+  color:var(--gold); border:1px solid color-mix(in srgb,var(--gold) 42%,var(--line));
+  background:color-mix(in srgb,var(--gold) 8%,transparent);
+  border-radius:999px; padding:.32rem .55rem .28rem;
+}
+.ver time{color:var(--faint); font-weight:400}
+.nav-links{display:flex; align-items:center; gap:.2rem 1.15rem; flex-wrap:wrap; justify-content:flex-end}
+.nav-links a{text-decoration:none; color:var(--ink-2); font-size:.94rem; font-weight:500}
+.nav-links a:hover{color:var(--ink)}
+.theme{
+  font:inherit; font-family:"IBM Plex Mono",monospace; font-size:.72rem; letter-spacing:.12em; text-transform:uppercase;
+  color:var(--ink-2); background:transparent; border:1px solid var(--line-2); border-radius:999px;
+  padding:.35rem .7rem; cursor:pointer;
+}
+.theme:hover{border-color:var(--gold); color:var(--ink)}
+
+.hero{
+  position:relative; overflow:hidden;
+  padding:clamp(3.2rem,8vh,6.2rem) 0 clamp(3.2rem,7vh,5.2rem);
+  background:radial-gradient(120% 80% at 50% -10%,var(--spot),transparent 60%),var(--wall);
+}
+.hero::after{
+  content:""; position:absolute; left:0; right:0; bottom:0; height:1px;
+  background:linear-gradient(90deg,transparent,var(--line-2) 30%,var(--line-2) 70%,transparent);
+}
+.hero-grid{display:grid; grid-template-columns:1.05fr .95fr; gap:clamp(2rem,5vw,4.5rem); align-items:center}
+.hero-copy{display:flex; flex-direction:column; gap:1.4rem; align-items:flex-start}
+.hero h1{font-size:clamp(2.6rem,1.9rem + 4.2vw,4.8rem)}
+.hero h1 em{font-style:italic; font-weight:600; color:var(--gold)}
+.tag{
+  display:inline-flex; align-items:center; gap:.55rem;
+  font-family:"IBM Plex Mono",monospace; font-size:.72rem; letter-spacing:.2em; text-transform:uppercase;
+  color:var(--ink-3); border:1px solid var(--line); border-radius:999px; padding:.4rem .8rem;
+}
+.tag b{color:var(--gold); font-weight:600}
+.cta-row{display:flex; flex-wrap:wrap; gap:.7rem; align-items:center}
+.btn{
+  display:inline-flex; align-items:center; gap:.6rem; text-decoration:none;
+  font-weight:600; font-size:.98rem; padding:.72rem 1.15rem; border-radius:12px;
+  border:1px solid transparent; transition:transform .16s ease, box-shadow .2s ease;
+}
+.btn svg{width:1.05em; height:1.05em; flex:none}
+.btn-gold{
+  color:#171205; border-color:color-mix(in srgb,var(--board-hi) 55%,#000 8%);
+  background:linear-gradient(160deg,var(--board-hi),var(--board-lo));
+  box-shadow:0 1px 0 color-mix(in srgb,var(--board-hi) 70%,#fff),var(--shadow);
+}
+.btn-gold:hover{transform:translateY(-2px)}
+.btn-ghost{color:var(--ink); border-color:var(--line-2); background:color-mix(in srgb,var(--surface) 70%,transparent)}
+.btn-ghost:hover{transform:translateY(-2px); border-color:var(--gold)}
+.hint{font-family:"IBM Plex Mono",monospace; font-size:.74rem; letter-spacing:.04em; color:var(--faint)}
+.hero-art{position:relative; display:grid; place-items:center; min-height:340px}
+.plate{position:relative; width:min(400px,78%); aspect-ratio:1; display:grid; place-items:center;
+  background:radial-gradient(70% 60% at 50% 38%,var(--spot),transparent 70%)}
+.hero-mark{width:72%; filter:drop-shadow(0 20px 40px rgba(0,0,0,.28))}
+.plaque{margin-top:1.1rem; text-align:center; font-family:"IBM Plex Mono",monospace;
+  font-size:.7rem; letter-spacing:.22em; text-transform:uppercase; color:var(--faint)}
+.plaque b{display:block; font-family:"Fraunces",serif; font-style:italic; font-weight:600;
+  letter-spacing:.01em; text-transform:none; font-size:1.15rem; color:var(--ink-2); margin-bottom:.2rem}
+
+.section{padding:clamp(4rem,9vh,7rem) 0}
+.sec-head{display:flex; flex-direction:column; gap:1rem; max-width:52ch; margin-bottom:clamp(2.2rem,5vh,3.4rem)}
+.sec-head h2{font-size:clamp(1.9rem,1.4rem + 2.4vw,3rem)}
+.sec-head p{color:var(--ink-2); font-size:clamp(1.02rem,1rem + .3vw,1.18rem); max-width:48ch}
+
+.hgrid{display:grid; grid-template-columns:repeat(4,1fr); gap:1rem}
+.hl{
+  border:1px solid var(--line); border-radius:18px; padding:1.25rem 1.2rem 1.35rem;
+  background:var(--surface); display:flex; flex-direction:column; gap:.55rem; min-height:100%;
+}
+.hl .n{font-family:"IBM Plex Mono",monospace; font-size:.72rem; letter-spacing:.16em; color:var(--gold); font-weight:600}
+.hl h3{font-family:"Fraunces",serif; font-weight:600; font-size:1.28rem; letter-spacing:-.01em; line-height:1.15}
+.hl p{color:var(--ink-2); font-size:.95rem; line-height:1.55}
+
+.lead{
+  display:grid; grid-template-columns:1fr 1fr; gap:clamp(1.5rem,4vw,3.5rem); align-items:center;
+  border:1px solid var(--line); border-radius:22px; padding:clamp(1.6rem,3vw,2.6rem);
+  background:var(--surface); box-shadow:var(--shadow);
+}
+.lead .copy{display:flex; flex-direction:column; gap:1rem; align-items:flex-start}
+.lead h3{font-size:clamp(1.5rem,1.2rem + 1.4vw,2.1rem)}
+.lead p{color:var(--ink-2)}
+.wall-demo{
+  aspect-ratio:4/3; border-radius:14px; overflow:hidden; position:relative;
+  border:1px solid var(--line-2); background:var(--wall-2);
+  display:grid; grid-template-columns:repeat(6,1fr); grid-auto-rows:1fr; gap:5px; padding:8px;
+}
+.wall-demo .t{border-radius:5px; background:linear-gradient(150deg,var(--c1),var(--c2)); position:relative; overflow:hidden}
+.wall-demo .t::after{content:""; position:absolute; inset:0; background:linear-gradient(115deg,transparent 40%,rgba(255,255,255,.14) 50%,transparent 60%)}
+.wall-demo .t.tall{grid-row:span 2}
+.fgrid{display:grid; grid-template-columns:1fr 1fr; gap:1.1rem; margin-top:1.1rem}
+.card{
+  border:1px solid var(--line); border-radius:18px; padding:1.55rem 1.5rem 1.65rem;
+  background:var(--surface); display:flex; flex-direction:column; gap:.75rem;
+  transition:transform .2s ease, border-color .2s ease, box-shadow .25s ease;
+}
+.card:hover{transform:translateY(-4px); border-color:color-mix(in srgb,var(--gold) 45%,var(--line)); box-shadow:var(--shadow)}
+.card .ic{width:34px; height:34px; color:var(--gold)}
+.card h3{font-family:"Fraunces",serif; font-weight:600; font-size:1.35rem; letter-spacing:-.01em}
+.card p{color:var(--ink-2); font-size:.98rem; line-height:1.58}
+.keys{display:flex; gap:.35rem; margin-top:.15rem; flex-wrap:wrap}
+.key{
+  font-family:"IBM Plex Mono",monospace; font-size:.72rem; color:var(--ink-2);
+  padding:.15rem .5rem; border-radius:6px; border:1px solid var(--line-2);
+  background:var(--wall-2); min-width:1.7rem; text-align:center;
+}
+
+.origin{position:relative; height:420vh}
+.origin-sticky{
+  position:sticky; top:3.6rem; height:calc(100vh - 3.6rem); overflow:hidden;
+  display:grid; align-content:center;
+  background:radial-gradient(90% 70% at 50% 42%,var(--spot),transparent 62%),var(--stage);
+}
+.origin-inner{
+  width:min(1120px,92vw); margin-inline:auto;
+  display:grid; grid-template-columns:1fr; gap:0;
+  align-items:center; height:100%; position:relative;
+}
+.origin-side{
+  position:absolute; left:0; top:50%; transform:translateY(-50%);
+  z-index:5; width:min(260px,34vw);
+  display:flex; flex-direction:column; gap:1rem;
+  padding:.8rem 1rem .8rem 0;
+  pointer-events:none;
+  background:linear-gradient(90deg,var(--stage) 55%,transparent);
+}
+.steps{display:flex; flex-direction:column; gap:.15rem; margin:0; padding:0; list-style:none}
+.steps li{
+  display:grid; grid-template-columns:auto 1fr; gap:.7rem; align-items:baseline;
+  padding:.45rem 0; opacity:.32; transition:opacity .35s ease; color:var(--ink-3);
+}
+.steps li .n{font-family:"IBM Plex Mono",monospace; font-size:.74rem; color:var(--gold); font-weight:600}
+.steps li .t{font-family:"Fraunces",serif; font-weight:600; font-size:1.02rem; color:var(--ink); line-height:1.25}
+.steps li .d{display:block; font-weight:400; font-size:.86rem; color:var(--ink-3); margin-top:.1rem}
+.steps li.on{opacity:1}
+.origin-progress{height:3px; background:var(--line); border-radius:3px; overflow:hidden}
+.origin-progress i{display:block; height:100%; width:0%; background:linear-gradient(90deg,var(--board-lo),var(--board-hi))}
+
+.stage{position:relative; display:grid; place-items:center; height:100%; perspective:1600px}
+.book-rig{
+  position:relative; width:min(460px,82vw); height:min(54vh,480px);
+  transform-style:preserve-3d; transform-origin:50% 58%;
+}
+.book-3d{
+  position:absolute; inset:0; transform-style:preserve-3d;
+  transform-origin:50% 55%;
+  will-change:transform,opacity;
+}
+.spine{
+  position:absolute; left:50%; top:9%; width:10px; height:76%; margin-left:-5px;
+  background:linear-gradient(90deg,#5a4010,#8a6a28 40%,#5a4010);
+  border-radius:2px; transform:translateZ(-1px);
+  box-shadow:0 10px 24px rgba(0,0,0,.35);
+}
+.board{
+  position:absolute; top:8%; width:46%; height:78%;
+  background:linear-gradient(160deg,var(--board-hi),var(--board-lo));
+  box-shadow:inset 0 0 0 1px rgba(0,0,0,.14), 0 18px 40px -18px rgba(0,0,0,.55);
+  transform-style:preserve-3d; backface-visibility:hidden;
+}
+.board.left{
+  left:50%; margin-left:-46%; border-radius:10px 3px 3px 10px;
+  transform-origin:right center;
+}
+.board.right{
+  left:50%; border-radius:3px 10px 10px 3px;
+  transform-origin:left center;
+}
+.board::before{
+  content:""; position:absolute; inset:0; border-radius:inherit;
+  background:linear-gradient(115deg,rgba(255,255,255,.18),transparent 42%,rgba(0,0,0,.12));
+  pointer-events:none;
+}
+.board::after{
+  content:""; position:absolute; inset:8% 7%; border-radius:2px;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.12);
+  opacity:.55; pointer-events:none;
+}
+.board.right .stamp{
+  position:absolute; left:50%; top:42%; transform:translate(-50%,-50%);
+  font-family:"Fraunces",serif; font-weight:900; font-style:italic;
+  font-size:1.35rem; letter-spacing:.18em;
+  color:rgba(40,28,8,.28); pointer-events:none; z-index:1;
+}
+.leaf{
+  position:absolute; top:11%; width:43%; height:72%;
+  transform-style:preserve-3d;
+}
+.leaf.left{left:50%; margin-left:-43%; transform-origin:right center}
+.leaf.right{left:50%; transform-origin:left center}
+.endpaper{
+  position:absolute; inset:0; border-radius:2px 4px 4px 2px;
+  background:
+    linear-gradient(90deg,rgba(90,64,16,.18),transparent 8%),
+    linear-gradient(180deg,#f3ead8,#e8dcc4);
+  box-shadow:inset 0 0 0 1px rgba(90,64,16,.12);
+}
+.leaf.right .endpaper{border-radius:4px 2px 2px 4px;
+  background:
+    linear-gradient(270deg,rgba(90,64,16,.14),transparent 8%),
+    linear-gradient(180deg,#f3ead8,#e8dcc4);
+}
+.sheet{
+  position:absolute; inset:0; border-radius:4px 2px 2px 4px;
+  transform-origin:left center; transform-style:preserve-3d;
+  pointer-events:none;
+}
+.sheet .recto,.sheet .verso{
+  position:absolute; inset:0; border-radius:inherit; backface-visibility:hidden;
+  overflow:hidden; color:#3a3428;
+  box-shadow:0 2px 14px rgba(0,0,0,.18);
+}
+.sheet .recto{
+  background:var(--page-face);
+  display:flex; flex-direction:column; gap:.45rem; padding:.95rem 1.05rem;
+}
+.sheet .verso{
+  background:var(--page-back);
+  transform:rotateY(180deg);
+  background-image:
+    repeating-linear-gradient(180deg,transparent 0 26px,rgba(90,64,16,.07) 26px 27px);
+}
+.sheet .kicker{font-family:"IBM Plex Mono",monospace; font-size:.58rem; letter-spacing:.16em; text-transform:uppercase; color:#8a7350}
+.sheet .title{font-family:"Fraunces",serif; font-weight:700; font-size:1.18rem; letter-spacing:-.02em; color:#2c261c; line-height:1.15}
+.sheet .art{flex:1; border-radius:5px; min-height:0; position:relative; overflow:hidden}
+.sheet .caption{font-size:.72rem; color:#6a5c48; line-height:1.35}
+
+.art-photo{background:linear-gradient(135deg,#d7c4a4 0%,#8a9bb0 42%,#4a5c72 100%)}
+.art-photo::before{content:""; position:absolute; inset:18% 22% auto; height:28%; border-radius:50%;
+  background:radial-gradient(circle at 40% 35%,#fff6d8,#f0c978 50%,transparent 70%); opacity:.9}
+.art-photo::after{content:""; position:absolute; left:0; right:0; bottom:0; height:38%;
+  background:linear-gradient(180deg,transparent,#3a4a38 30%,#2a3228)}
+.art-video{background:linear-gradient(160deg,#1c2230,#3a4560)}
+.art-video::before{content:""; position:absolute; left:50%; top:50%; width:48px; height:48px; margin:-24px;
+  border-radius:50%; border:2px solid rgba(255,255,255,.55); background:rgba(255,255,255,.08)}
+.art-video::after{content:""; position:absolute; left:50%; top:50%; width:0; height:0; margin:-9px 0 0 -5px;
+  border-style:solid; border-width:9px 0 9px 16px; border-color:transparent transparent transparent #f2efe8}
+.art-illust{background:
+  radial-gradient(circle at 30% 30%,#f2c4b0,#e08a6a 40%,transparent 55%),
+  radial-gradient(circle at 70% 60%,#9ec5e8,#5a84b8 45%,transparent 60%),
+  linear-gradient(180deg,#f6e8d8,#d8c4a8)}
+.art-illust::before{content:""; position:absolute; left:18%; bottom:16%; width:28%; height:42%;
+  border-radius:40% 40% 8% 8%; background:#2f2a28; opacity:.55}
+.art-illust::after{content:""; position:absolute; right:16%; bottom:20%; width:22%; height:34%;
+  border-radius:40% 40% 8% 8%; background:#4a3a32; opacity:.45}
+.art-novel{background:linear-gradient(180deg,#f8f2e6,#efe4d0)}
+.art-novel::before{content:"Once the house was quiet, the shelves still held every evening we had kept.";
+  position:absolute; inset:16% 12%; font-family:"Fraunces",serif; font-style:italic;
+  font-size:.82rem; line-height:1.65; color:#5a4a38}
+.art-comic{background:#f4efe6;
+  background-image:
+    linear-gradient(#d8cfc0 1px,transparent 1px),
+    linear-gradient(90deg,#d8cfc0 1px,transparent 1px);
+  background-size:33.33% 50%}
+.art-comic::before{content:""; position:absolute; left:6%; top:8%; width:40%; height:38%;
+  background:linear-gradient(145deg,#6a8fbf,#3a5a8a); border:2px solid #2a2a28}
+.art-comic::after{content:""; position:absolute; right:6%; bottom:10%; width:46%; height:42%;
+  background:linear-gradient(160deg,#d6ae42,#8a6a20); border:2px solid #2a2a28}
+
+.logo-settle{
+  position:absolute; left:50%; top:50%; width:min(360px,80%);
+  transform:translate(-50%,-48%) scale(.9); opacity:0; pointer-events:none;
+  filter:drop-shadow(0 18px 36px rgba(0,0,0,.35));
+}
+.frame-wordmark{
+  position:absolute; inset:auto 0 5%; text-align:center; opacity:0; pointer-events:none;
+}
+.frame-wordmark .wm{font-family:"Fraunces",serif; font-weight:900; font-size:clamp(2rem,5vw,3.2rem); color:var(--ink)}
+.frame-wordmark .sub{font-family:"IBM Plex Mono",monospace; font-size:.74rem; letter-spacing:.2em; text-transform:uppercase; color:var(--gold); margin-top:.3rem}
+
+.vocab{background:var(--wall-2); border-block:1px solid var(--line)}
+.vocab .wrap{display:grid; grid-template-columns:1fr 1.15fr; gap:clamp(2rem,5vw,4rem); align-items:center}
+.iconwall{display:grid; grid-template-columns:repeat(4,1fr); gap:.8rem}
+.itile{
+  aspect-ratio:1; border:1px solid var(--line-2); border-radius:14px; display:grid; place-items:center;
+  background:var(--surface); color:var(--ink-2); transition:color .2s ease, transform .2s ease, border-color .2s ease;
+}
+.itile:hover{color:var(--gold); transform:translateY(-3px); border-color:var(--gold)}
+.itile svg{width:46%; height:46%}
+
+.download{position:relative; overflow:hidden;
+  background:radial-gradient(100% 70% at 50% 0%,var(--spot),transparent 60%),var(--wall)}
+.dl-card{
+  border:1px solid var(--line); border-radius:24px; background:var(--surface); box-shadow:var(--shadow);
+  padding:clamp(2rem,5vw,3.4rem); text-align:center; display:flex; flex-direction:column; gap:1.4rem; align-items:center;
+}
+.dl-card h2{font-size:clamp(2rem,1.5rem + 2.4vw,3.2rem)}
+.dl-mark{width:92px; filter:drop-shadow(0 12px 24px rgba(0,0,0,.25))}
+.dl-buttons{display:flex; flex-wrap:wrap; gap:.8rem; justify-content:center}
+.dl-buttons .btn{padding:.85rem 1.3rem; font-size:1rem}
+.plat{display:flex; flex-direction:column; align-items:flex-start; line-height:1.15}
+.plat small{font-family:"IBM Plex Mono",monospace; font-size:.66rem; letter-spacing:.1em; opacity:.7; text-transform:uppercase}
+.specs{display:flex; flex-wrap:wrap; gap:.4rem 1.4rem; justify-content:center; font-family:"IBM Plex Mono",monospace;
+  font-size:.76rem; letter-spacing:.03em; color:var(--faint)}
+.specs b{color:var(--ink-2); font-weight:500}
+.trust{display:grid; grid-template-columns:repeat(2,1fr); gap:.7rem 2rem; margin-top:.6rem; max-width:680px; text-align:left}
+.trust div{display:grid; grid-template-columns:auto 1fr; gap:.6rem; font-size:.9rem; color:var(--ink-3); line-height:1.45}
+.trust .ck{color:var(--gold); font-weight:700}
+
+footer{padding:clamp(2.5rem,6vh,4rem) 0; border-top:1px solid var(--line); background:var(--wall)}
+.foot{display:flex; flex-wrap:wrap; gap:1.2rem 2rem; align-items:center; justify-content:space-between}
+.foot .mk{display:flex; align-items:center; gap:.7rem; font-family:"Fraunces",serif; font-weight:900; font-size:1.3rem}
+.foot .mk svg{width:34px; height:24px}
+.foot p{color:var(--faint); font-size:.85rem; max-width:56ch}
+.credit{font-family:"IBM Plex Mono",monospace; font-size:.75rem; letter-spacing:.02em; color:var(--faint)}
+
+.reveal{opacity:0; transform:translateY(20px); transition:opacity .7s ease, transform .7s cubic-bezier(.2,.7,.2,1)}
+.reveal.in{opacity:1; transform:none}
+
+.lead.solo{grid-template-columns:1fr}
+.ui-stage{margin-top:1.1rem}
+.ui-try{margin:.9rem 0 0; color:var(--faint); font-family:"IBM Plex Mono",monospace; font-size:.74rem; letter-spacing:.03em}
+.ui-beats{display:flex; flex-wrap:wrap; gap:.45rem; margin:0 0 .8rem}
+.ui-beats button{
+  font:inherit; font-size:.82rem; font-weight:600; color:var(--ink-2);
+  padding:.4rem .7rem; border-radius:999px; border:1px solid var(--line-2);
+  background:var(--surface); cursor:pointer;
+}
+.ui-beats button.on{color:#171205; border-color:transparent; background:linear-gradient(160deg,var(--board-hi),var(--board-lo))}
+.ui-caption{margin:.15rem 0 0; color:var(--ink-2); min-height:1.5em}
+.ui-window{
+  --ui-panel:var(--wall-2); --ui-line:var(--line); --ui-muted:var(--ink-3);
+  display:grid; grid-template-columns:172px minmax(0,1fr);
+  height:auto; min-height:620px;
+  border:1px solid var(--line-2); border-radius:18px; overflow:hidden;
+  background:var(--wall); color:var(--ink); box-shadow:var(--shadow);
+  font-family:"Hanken Grotesk",system-ui,sans-serif; font-size:13px; line-height:1.35;
+}
+.ui-window button{font:inherit; color:inherit; border:0; background:transparent; cursor:pointer; padding:0}
+.ui-window h3{font-family:inherit; font-weight:650; letter-spacing:-.055em; line-height:1}
+.ui-rail{
+  display:flex; flex-direction:column; min-width:0; min-height:0;
+  background:var(--ui-panel); border-right:1px solid var(--ui-line); padding:14px 10px 10px;
+}
+.ui-rail nav,.ui-tree{display:flex; flex-direction:column; gap:2px}
+.ui-rail nav button,.ui-tree button{
+  display:flex; align-items:center; gap:8px; width:100%;
+  padding:8px 8px; border-radius:9px; color:var(--ui-muted); text-align:left; font-size:13px; font-weight:600;
+}
+.ui-rail nav button svg,.ui-tree button svg{width:16px; height:16px; flex:none; color:var(--gold)}
+.ui-rail nav button.on,.ui-tree button.on{background:color-mix(in srgb,var(--ink) 10%,var(--ui-panel)); color:var(--ink)}
+.ui-rail nav button small,.ui-tree button small{margin-left:auto; color:var(--faint); font-size:11px; font-weight:500}
+.ui-tree{margin-top:14px; min-height:0; overflow:auto}
+.ui-tree-label{
+  display:flex; align-items:center; justify-content:space-between;
+  margin:0 8px 6px; color:var(--faint); font-size:10px; font-weight:700; letter-spacing:.14em; text-transform:uppercase;
+}
+.ui-rail-foot{
+  display:grid; grid-template-columns:1fr 1px 1fr; margin-top:auto; padding-top:8px; border-top:1px solid var(--ui-line);
+}
+.ui-rail-foot span{display:grid; place-items:center; padding:8px 4px; color:var(--ui-muted); font-size:11px; font-weight:650}
+.ui-rail-foot i{background:var(--ui-line); margin:8px 0}
+.ui-main{display:flex; flex-direction:column; min-width:0; min-height:auto; background:var(--wall)}
+.ui-head{
+  display:flex; align-items:center; gap:8px; min-height:52px; padding:0 16px;
+  border-bottom:1px solid var(--ui-line);
+}
+.ui-head .mk{width:28px; height:18px; flex:none}
+.ui-head .product{color:var(--ui-muted); font-size:12px}
+.ui-lib{
+  display:inline-flex; align-items:center; gap:6px; margin-left:8px;
+  padding:2px 8px; border-radius:7px; font-size:16px; font-weight:650; letter-spacing:-.04em;
+}
+.ui-lib small{
+  display:inline-block; width:0; height:0; overflow:visible; font-size:0; line-height:0; vertical-align:2px;
+  border-left:4px solid transparent; border-right:4px solid transparent; border-top:5px solid var(--ui-muted);
+}
+.ui-body{position:relative; flex:0 0 auto; min-height:auto; overflow:visible; padding:14px 16px 16px}
+.ui-kicker{color:var(--gold); font-size:10px; font-weight:800; letter-spacing:.16em; text-transform:uppercase}
+.ui-body h3{margin:4px 0 0; font-size:28px}
+.ui-recent{display:flex; align-items:center; gap:12px; margin:12px 0 8px}
+.ui-recent > span{flex:none; color:var(--ui-muted); font-size:10px; font-weight:800; letter-spacing:.14em; text-transform:uppercase}
+.ui-recent-row{display:flex; gap:10px; min-width:0; overflow:auto; scrollbar-width:none}
+.ui-recent-row::-webkit-scrollbar{display:none}
+.ui-recent button{width:78px; flex:none; text-align:left; color:var(--ui-muted)}
+.ui-recent .thumb,.ui-film .thumb{position:relative; display:block; overflow:hidden}
+.ui-recent .thumb{height:52px; border-radius:10px; border:1px solid var(--ui-line)}
+.ui-recent .thumb .pic,.ui-film .thumb .pic{position:absolute; inset:0}
+.ui-search input::-webkit-search-cancel-button,.ui-search input::-webkit-search-decoration{-webkit-appearance:none; appearance:none}
+.ui-recent button.on .thumb,.ui-recent button:hover .thumb{border-color:var(--gold)}
+.ui-recent em{display:block; margin-top:4px; overflow:hidden; font-style:normal; font-size:10px; text-overflow:ellipsis; white-space:nowrap}
+.ui-bar{
+  display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:8px;
+  margin:8px 0 14px; padding:7px 0; border-block:1px solid color-mix(in srgb,var(--ui-line) 80%,transparent);
+}
+.ui-crumb{color:var(--ui-muted); font-size:12px}
+.ui-tools{display:flex; flex-wrap:wrap; align-items:center; gap:8px}
+.ui-search input{
+  width:132px; padding:5px 10px; border:1px solid var(--ui-line); border-radius:8px;
+  background:var(--ui-panel); color:var(--ink); font:inherit; font-size:12px;
+}
+.ui-search input:focus{outline:none; border-color:var(--gold)}
+.ui-sort{display:flex; gap:2px; padding:2px; border-radius:9px; background:color-mix(in srgb,var(--ink) 8%,transparent)}
+.ui-sort button{padding:5px 8px; border-radius:7px; color:var(--ui-muted); font-size:11px; font-weight:650}
+.ui-sort button.on{background:var(--surface); color:var(--ink)}
+.ui-grid{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px 10px}
+.ui-tile{display:flex; min-width:0; flex-direction:column; text-align:left}
+.ui-tile.out{display:none}
+.ui-thumb{position:relative; display:block; aspect-ratio:1/.64; overflow:hidden; border-radius:12px; background:#292a32}
+.ui-thumb .pic{position:absolute; inset:0; transition:transform .23s ease, filter .23s ease}
+.ui-tile:hover .pic{transform:scale(1.035); filter:brightness(1.06)}
+.ui-tile.reel .pic,.ui-tile.reel:hover .pic{transform:none; filter:none}
+.ui-frames{position:absolute; inset:0}
+.ui-frames i{position:absolute; inset:0; opacity:0; transition:opacity .48s cubic-bezier(.4,0,.2,1)}
+.ui-tile.reel .ui-frames i.on{opacity:1}
+.ui-badge{
+  position:absolute; z-index:2; top:7px; right:7px; padding:3px 5px; border-radius:5px;
+  background:rgba(8,9,12,.72); color:#fff; font-size:8px; font-weight:800; letter-spacing:.07em;
+}
+.ui-badge.comic{color:#f1c66b}
+.ui-vtags,.ui-vtime{
+  position:absolute; z-index:2; left:8px; right:8px; color:#fff; font-size:10px; font-weight:650;
+  text-shadow:0 1px 3px rgba(0,0,0,.85); opacity:0; transition:opacity .2s ease;
+}
+.ui-vtags{bottom:18px; overflow:hidden; white-space:nowrap; text-overflow:ellipsis}
+.ui-vtime{bottom:6px; right:auto; font-weight:700; letter-spacing:.04em}
+.ui-tile.reel .ui-vtags,.ui-tile.reel .ui-vtime{opacity:1}
+.ui-progress{position:absolute; z-index:2; left:0; right:0; bottom:0; height:3px; background:rgba(0,0,0,.35)}
+.ui-progress b{display:block; height:100%; width:0; background:#fff; transition:width .48s linear}
+.ui-cap{display:grid; gap:1px; padding:6px 2px 0}
+.ui-cap strong{overflow:hidden; font-size:12px; font-weight:650; text-overflow:ellipsis; white-space:nowrap}
+.ui-cap small{overflow:hidden; color:var(--ui-muted); font-size:11px; text-overflow:ellipsis; white-space:nowrap}
+.pic-north{background:linear-gradient(145deg,#d7c4a4 0%,#7f93ab 46%,#314056)}
+.pic-north::after{content:""; position:absolute; left:18%; top:16%; width:34%; height:28%; border-radius:50%; background:radial-gradient(circle at 40% 35%,#fff6d8,#e7b85a 60%,transparent 72%)}
+.pic-dusk{background:linear-gradient(180deg,#f0b56a 0%,#c46a4a 28%,#2a3348 70%,#141820)}
+.pic-dusk-2{background:linear-gradient(160deg,#1c2433,#3d4d66 40%,#8a623c)}
+.pic-dusk-2::after{content:""; position:absolute; left:22%; right:22%; bottom:18%; height:28%; border-radius:40% 40% 8% 8%; background:#0e1218; opacity:.8}
+.pic-dusk-3{background:linear-gradient(180deg,#1a2030,#0e1218 55%); box-shadow:inset 0 30% 40px rgba(240,180,90,.25)}
+.pic-dusk-3::before{content:""; position:absolute; left:30%; top:42%; width:8px; height:8px; border-radius:50%; background:#f2efe8; box-shadow:18px 6px 0 #f2efe8, 34px -4px 0 #e8c98a}
+.pic-harbour{background:linear-gradient(180deg,#9ec4d4,#3d6a78 40%,#1d3338)}
+.pic-harbour::after{content:""; position:absolute; left:0; right:0; bottom:0; height:42%; background:linear-gradient(180deg,transparent,rgba(8,20,24,.55))}
+.pic-chapter{background:#f4efe6; background-image:linear-gradient(#d8cfc0 1px,transparent 1px),linear-gradient(90deg,#d8cfc0 1px,transparent 1px); background-size:33% 50%}
+.pic-quiet{background:linear-gradient(180deg,#f8f2e6,#efe4d0)}
+.pic-quiet::before{content:"The house kept every evening."; position:absolute; inset:22% 14%; font-family:"Fraunces",serif; font-style:italic; font-size:11px; line-height:1.45; color:#5a4a38}
+.pic-kitchen{background:linear-gradient(135deg,#e7d3b0,#c4896a 40%,#5c4038)}
+.ui-viewer{
+  position:absolute; inset:0; z-index:5; display:grid; grid-template-rows:auto minmax(0,1fr) auto; gap:10px;
+  padding:12px 14px 12px; background:var(--stage); opacity:0; visibility:hidden;
+  transform:translateY(10px); transition:opacity .28s ease, transform .28s ease, visibility .28s;
+}
+.ui-viewer.open{opacity:1; visibility:visible; transform:none}
+.ui-viewer-bar{display:flex; align-items:center; gap:10px}
+.ui-viewer-bar button{color:var(--ui-muted); font-size:12px; font-weight:650}
+.ui-viewer-bar button:hover{color:var(--ink)}
+.ui-viewer-bar strong{font-size:14px; font-weight:650; letter-spacing:-.03em}
+.ui-viewer-art{position:relative; min-height:0; border-radius:12px; overflow:hidden}
+.ui-viewer-art .pic{position:absolute; inset:0}
+.ui-film{display:flex; gap:8px; overflow:auto}
+.ui-film button{width:72px; flex:none}
+.ui-film .thumb{display:block; height:48px; border-radius:8px; border:1px solid transparent; overflow:hidden}
+.ui-film button.on .thumb{border-color:var(--gold)}
+.ui-cursor{
+  position:absolute; z-index:6; width:16px; height:16px; margin:-2px 0 0 -2px; border-radius:50%;
+  border:2px solid #fff; background:color-mix(in srgb,var(--gold) 75%,#000);
+  box-shadow:0 2px 8px rgba(0,0,0,.35); pointer-events:none; opacity:0;
+  transition:left .65s cubic-bezier(.2,.7,.2,1), top .65s cubic-bezier(.2,.7,.2,1), opacity .2s, transform .12s;
+}
+.ui-cursor.show{opacity:1}
+.ui-cursor.down{transform:scale(.78)}
+
+@media (max-width:900px){
+  .hero-grid{grid-template-columns:1fr; gap:2.5rem}
+  .hero-art{order:-1}
+  .hgrid{grid-template-columns:1fr 1fr}
+  .origin-side{
+    position:static; transform:none; width:auto; max-width:36ch;
+    margin:0 auto 1rem; padding:0; background:none; text-align:center;
+  }
+  .steps{display:none}
+  .origin-progress{max-width:200px; margin-inline:auto}
+  .lead,.vocab .wrap{grid-template-columns:1fr}
+  .ui-window{grid-template-columns:1fr; height:auto; min-height:0}
+  .ui-rail{display:none}
+  .ui-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .trust{grid-template-columns:1fr}
+}
+@media (max-width:560px){
+  .hgrid,.fgrid{grid-template-columns:1fr}
+  .hero h1{font-size:clamp(2.3rem,7vw,3rem)}
+  .nav-inner{align-items:flex-start; flex-wrap:wrap; padding-block:.6rem; row-gap:.45rem}
+  .nav-links{width:100%; justify-content:flex-start}
+  .nav-links a{font-size:.86rem}
+  .tag{letter-spacing:.12em; line-height:1.45; text-wrap:balance}
+}
+@media (prefers-reduced-motion:reduce){
+  *{animation-duration:.001ms !important; animation-iteration-count:1 !important; transition-duration:.001ms !important; scroll-behavior:auto !important}
+  .origin{height:auto}
+  .origin-sticky{position:static; height:auto; padding:clamp(3rem,8vh,5rem) 0}
+  .reveal{opacity:1; transform:none}
+  .ui-cursor{display:none}
+}
+</style>
+</head>
+<body>
+
+<nav class="nav" aria-label="Primary">
+  <div class="nav-inner">
+    <div class="brand-row">
+    <a class="brand" href="#top">
+      <svg viewBox="15.02 40.70 169.95 120.80" aria-hidden="true">
+        <defs>
+          <linearGradient id="gild-nav" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="var(--board-hi)"/><stop offset="1" stop-color="var(--board-lo)"/>
+          </linearGradient>
+          <clipPath id="nL"><rect x="-200" y="-200" width="300" height="600"/></clipPath>
+          <clipPath id="nR"><rect x="100" y="-200" width="400" height="600"/></clipPath>
+        </defs>
+        <g fill="none" stroke-linejoin="round">
+          <g clip-path="url(#nL)"><path d="M 40.33,43.11 L 97.03,133.85 A 3.5 3.5 0 0 0 102.97,133.85 L 159.67,43.11" stroke="var(--page)" stroke-width="22"/></g>
+          <g clip-path="url(#nR)"><path d="M 40.33,43.11 L 97.03,133.85 A 3.5 3.5 0 0 0 102.97,133.85 L 159.67,43.11" stroke="var(--page)" stroke-width="22"/></g>
+          <path d="M 23.69,47.62 L 83.04,142.60 A 20 20 0 0 0 116.96,142.60 L 176.31,47.62" stroke="url(#gild-nav)" stroke-width="11"/>
+        </g>
+      </svg>
+      Viora
+    </a>
+    <span class="ver">v1.0.0 <time datetime="2026-10-02">2026.10.2</time></span>
+    </div>
+    <div class="nav-links">
+      <a href="#highlights">Highlights</a>
+      <a href="#features">Features</a>
+      <a href="#origin">The mark</a>
+      <a href="#download">Download</a>
+      <button type="button" class="theme" id="theme">Dark</button>
+    </div>
+  </div>
+</nav>
+
+<header class="hero" id="top">
+  <div class="wrap hero-grid">
+    <div class="hero-copy">
+      <span class="tag">Personal media library</span>
+      <h1>Your library, kept like a <em>book</em> on the shelf.</h1>
+      <p class="lede">Viora is a desktop library for photos, video, comics, illustrations and novels. One quiet window for what you already keep at home or on a NAS.</p>
+      <div class="cta-row">
+        <a class="btn btn-gold" href="#download">Download Viora</a>
+        <a class="btn btn-ghost" href="#features">Core features</a>
+      </div>
+      <span class="hint">Free &middot; v1.0.0 &middot; updated 2026.10.2 &middot; Apple Silicon &middot; Intel &middot; Windows</span>
+    </div>
+    <div class="hero-art">
+      <div class="plate">
+        <svg class="hero-mark" viewBox="15.02 40.70 169.95 120.80" role="img" aria-label="Viora mark, an open book seen from below">
+          <defs>
+            <linearGradient id="gild-hero" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stop-color="var(--board-hi)"/>
+              <stop offset="1" stop-color="var(--board-lo)"/>
+            </linearGradient>
+            <clipPath id="hL"><rect x="-200" y="-200" width="300" height="600"/></clipPath>
+            <clipPath id="hR"><rect x="100" y="-200" width="400" height="600"/></clipPath>
+          </defs>
+          <g fill="none" stroke-linejoin="round">
+            <g clip-path="url(#hL)">
+              <path d="M 40.33,43.11 L 97.03,133.85 A 3.5 3.5 0 0 0 102.97,133.85 L 159.67,43.11" stroke="var(--page)" stroke-width="22"/>
+              <path d="M 37.26,48.57 L 92.37,136.77 A 9 9 0 0 0 107.63,136.77" stroke="var(--page-line)" stroke-width="1.6"/>
+              <path d="M 42.34,45.39 L 97.46,133.59 A 3 3 0 0 0 102.54,133.59" stroke="var(--page-line)" stroke-width="1.6"/>
+            </g>
+            <g clip-path="url(#hR)">
+              <path d="M 40.33,43.11 L 97.03,133.85 A 3.5 3.5 0 0 0 102.97,133.85 L 159.67,43.11" stroke="var(--page)" stroke-width="22"/>
+              <path d="M 92.37,136.77 A 9 9 0 0 0 107.63,136.77 L 162.74,48.57" stroke="var(--page-line)" stroke-width="1.6"/>
+              <path d="M 97.46,133.59 A 3 3 0 0 0 102.54,133.59 L 157.66,45.39" stroke="var(--page-line)" stroke-width="1.6"/>
+            </g>
+            <path d="M 100.00,146.50 V 117.85" stroke="var(--gutter)" stroke-width="1.8" stroke-linecap="round"/>
+            <path d="M 23.69,47.62 L 83.04,142.60 A 20 20 0 0 0 116.96,142.60 L 176.31,47.62" stroke="url(#gild-hero)" stroke-width="11"/>
+          </g>
+        </svg>
+        <div class="plaque"><b>Viora</b>an open book for your media</div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<section class="section" id="highlights" style="padding-top:clamp(3rem,7vh,5rem)">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <p class="eyebrow">Highlights</p>
+      <h2>A library that reads what you already have.</h2>
+      <p>Viora does not ask you to import a second copy. It indexes the folders you point at, then stays out of the way while you look.</p>
+    </div>
+    <div class="hgrid">
+      <article class="hl reveal">
+        <span class="n">01</span>
+        <h3>Files stay put</h3>
+        <p>Photos, video, comics and novels remain in the folders you chose. Local mode never leaves this machine, and nothing is uploaded to make a library.</p>
+      </article>
+      <article class="hl reveal">
+        <span class="n">02</span>
+        <h3>This computer or a NAS</h3>
+        <p>One Go server. The desktop starts it on loopback, or you run the same binary in Docker on the shelf, with several libraries if you want them.</p>
+      </article>
+      <article class="hl reveal">
+        <span class="n">03</span>
+        <h3>A wall that keeps up</h3>
+        <p>Browsing is one virtualized wall. A long shelf still scrolls as a single surface, and opening a file takes the whole window.</p>
+      </article>
+      <article class="hl reveal">
+        <span class="n">04</span>
+        <h3>Quiet until you ask</h3>
+        <p>No account to begin. Plugins, model packs and a NAS password appear only when you choose them. The wall works with none of that installed.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="features" style="padding-top:0">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <p class="eyebrow">Core features</p>
+      <h2>A wall for looking. Rooms for reading. A server that stays yours.</h2>
+      <p>The desktop is an Electron window. The library itself is a Go backend — local by default, the same program on a NAS. Media stays on your disks.</p>
+    </div>
+
+    <div class="lead reveal solo">
+      <div class="copy">
+        <p class="eyebrow">The wall</p>
+        <h3>Photos, video, comics and novels in one scroll.</h3>
+        <p>Folders carry a type: Images, Videos, Comics or Novels. Images can be marked photos, illustrations, anime or 3D. The wall then speaks that topic — a media wall, a comic wall that can show an identity you already stored, or a novel shelf. Search and sort stay on the wall. At the library root, a row of what you opened recently sits under the title, and only on this computer.</p>
+        <div class="keys"><span class="key">Images</span><span class="key">Videos</span><span class="key">Comics</span><span class="key">Novels</span></div>
+      </div>
+    </div>
+
+    <figure class="ui-stage reveal" id="window">
+      <div class="ui-beats" aria-label="Ways the wall stays in one place">
+        <button type="button" data-beat="hover" class="on">Preview in place</button>
+        <button type="button" data-beat="recent">Continue from recent</button>
+        <button type="button" data-beat="sort">Sort on the wall</button>
+        <button type="button" data-beat="search">Search without leaving</button>
+      </div>
+      <p class="ui-caption" id="uiCaption" aria-live="polite">Rest on a video. The next frames play on the card.</p>
+      <div class="ui-window" id="uiWindow">
+        <aside class="ui-rail" aria-hidden="true">
+          <nav>
+            <button type="button" class="on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4.9 4.2h5.6a2.3 2.3 0 0 1 2.3 2.3v10.8a2.3 2.3 0 0 1-2.3 2.3H4.9a2.3 2.3 0 0 1-2.3-2.3V6.5a2.3 2.3 0 0 1 2.3-2.3z"/><path d="M16.7 4.2h2.8a1.9 1.9 0 0 1 1.9 1.9v3a1.9 1.9 0 0 1-1.9 1.9h-2.8a1.9 1.9 0 0 1-1.9-1.9V6.1a1.9 1.9 0 0 1 1.9-1.9z"/><path d="M16.7 12.8h2.8a1.9 1.9 0 0 1 1.9 1.9v3a1.9 1.9 0 0 1-1.9 1.9h-2.8a1.9 1.9 0 0 1-1.9-1.9v-3a1.9 1.9 0 0 1 1.9-1.9z"/></svg>My Library</button>
+            <button type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 6.2h9.6a2.4 2.4 0 0 1 2.4 2.4v6.8a2.4 2.4 0 0 1-2.4 2.4H9L3.4 12.8a1.2 1.2 0 0 1 0-1.6z"/><circle cx="8.4" cy="12" r="1.3" fill="currentColor" stroke="none"/></svg>Tags</button>
+            <button type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M6.9 2.6h10.2a2.5 2.5 0 0 1 2.5 2.5v13.8a2.5 2.5 0 0 1-2.5 2.5H6.9a2.5 2.5 0 0 1-2.5-2.5V5.1a2.5 2.5 0 0 1 2.5-2.5z"/><circle cx="12" cy="9.8" r="2.55"/><path d="M8.2 17.9c0-3.4 7.6-3.4 7.6 0"/></svg>People</button>
+            <button type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M5 3h3.8a2 2 0 0 1 2 2v3.8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="M15.2 3H19a2 2 0 0 1 2 2v3.8a2 2 0 0 1-2 2h-3.8a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="M5 13.2h3.8a2 2 0 0 1 2 2V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-3.8a2 2 0 0 1 2-2z"/><path d="M15.2 13.2H19a2 2 0 0 1 2 2V19a2 2 0 0 1-2 2h-3.8a2 2 0 0 1-2-2v-3.8a2 2 0 0 1 2-2z"/></svg>Collections</button>
+          </nav>
+          <div class="ui-tree">
+            <div class="ui-tree-label">Folders <span>+</span></div>
+            <button type="button" class="on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 17.8V6.2a2.1 2.1 0 0 1 2.1-2.1H9.1l2.3 2.5h7.5a2.1 2.1 0 0 1 2.1 2.1v9.1a2.1 2.1 0 0 1-2.1 2.1H5.1a2.1 2.1 0 0 1-2.1-2.1z"/></svg>Photos<small>128</small></button>
+            <button type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 17.8V6.2a2.1 2.1 0 0 1 2.1-2.1H9.1l2.3 2.5h7.5a2.1 2.1 0 0 1 2.1 2.1v9.1a2.1 2.1 0 0 1-2.1 2.1H5.1a2.1 2.1 0 0 1-2.1-2.1z"/></svg>Films<small>24</small></button>
+            <button type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 17.8V6.2a2.1 2.1 0 0 1 2.1-2.1H9.1l2.3 2.5h7.5a2.1 2.1 0 0 1 2.1 2.1v9.1a2.1 2.1 0 0 1-2.1 2.1H5.1a2.1 2.1 0 0 1-2.1-2.1z"/></svg>Books<small>16</small></button>
+          </div>
+          <div class="ui-rail-foot"><span>Activity</span><i></i><span>Plugins</span></div>
+        </aside>
+        <div class="ui-main">
+          <header class="ui-head">
+            <svg class="mk" viewBox="15.02 40.70 169.95 120.80" aria-hidden="true">
+              <path d="M40.33 43.11 L97.03 133.85 A3.5 3.5 0 0 0 102.97 133.85 L159.67 43.11" fill="none" stroke="var(--page)" stroke-width="22" stroke-linejoin="round"/>
+              <path d="M23.69 47.62 L83.04 142.60 A20 20 0 0 0 116.96 142.60 L176.31 47.62" fill="none" stroke="var(--board-hi)" stroke-width="11" stroke-linejoin="round"/>
+            </svg>
+            <span class="product">Viora</span>
+            <span class="ui-lib">Home <small>▾</small></span>
+          </header>
+          <div class="ui-body" id="uiBody">
+            <p class="ui-kicker">Library</p>
+            <h3>My Library</h3>
+            <div class="ui-recent">
+              <span>Recent</span>
+              <div class="ui-recent-row" id="uiRecent"></div>
+            </div>
+            <div class="ui-bar">
+              <span class="ui-crumb">Home</span>
+              <div class="ui-tools">
+                <label class="ui-search"><input id="uiSearch" type="search" placeholder="Search" aria-label="Search the wall"></label>
+                <div class="ui-sort" role="group" aria-label="Sort">
+                  <button type="button" data-sort="name" class="on">Name</button>
+                  <button type="button" data-sort="date">Date</button>
+                  <button type="button" data-sort="size">Size</button>
+                </div>
+              </div>
+            </div>
+            <div class="ui-grid" id="uiGrid"></div>
+            <div class="ui-viewer" id="uiViewer">
+              <div class="ui-viewer-bar">
+                <button type="button" id="uiBack">← Wall</button>
+                <strong id="uiViewerName"></strong>
+              </div>
+              <div class="ui-viewer-art" id="uiViewerArt"></div>
+              <div class="ui-film" id="uiFilm"></div>
+            </div>
+            <div class="ui-cursor" id="uiCursor" aria-hidden="true"></div>
+          </div>
+        </div>
+      </div>
+      <p class="ui-try">The tour plays on its own. Hover the window to sort, search, or open a thumbnail yourself.</p>
+    </figure>
+
+    <div class="fgrid">
+      <article class="card reveal">
+        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M 5.7,4.8 H 18.3 a 2.5,2.5 0 0 1 2.5,2.5 V 16.7 a 2.5,2.5 0 0 1 -2.5,2.5 H 5.7 a 2.5,2.5 0 0 1 -2.5,-2.5 V 7.3 a 2.5,2.5 0 0 1 2.5,-2.5 Z"/><path d="M 10.4,9.2 L 15.4,12 L 10.4,14.8 Z" fill="currentColor" stroke="none"/></svg>
+        <h3>A room for each kind of file</h3>
+        <p>A photo opens full-bleed, with a filmstrip of its neighbours. Video plays the original file, and resting on a video card can cross-fade through preview frames. Comics turn by page or as a spread, left to right or right to left. Novels are their own reading room. Each player takes the window, then returns you to the wall.</p>
+        <div class="keys"><span class="key">Photos</span><span class="key">Video</span><span class="key">Comics</span><span class="key">Novels</span></div>
+      </article>
+
+      <article class="card reveal">
+        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M 3,17.8 V 6.2 a 2.1,2.1 0 0 1 2.1,-2.1 H 9.1 l 2.3,2.5 H 18.9 a 2.1,2.1 0 0 1 2.1,2.1 V 17.8 a 2.1,2.1 0 0 1 -2.1,2.1 H 5.1 a 2.1,2.1 0 0 1 -2.1,-2.1 Z"/></svg>
+        <h3>The file keeps its place in the library</h3>
+        <p>Rename, move or trash from the wall. The library follows the file, so a name change in place does not drop the metadata you already attached. Deleted items sit in a bin you can restore. A Collection can mix loose files, whole folders and live tags — cover, accent and density included — without moving or copying anything on disk. Collections live on this computer.</p>
+        <div class="keys"><span class="key">Rename</span><span class="key">Move</span><span class="key">Trash</span><span class="key">Collections</span></div>
+      </article>
+
+      <article class="card reveal">
+        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.2,15.6 V 6.4 a 2.2,2.2 0 0 1 2.2,-2.2 H 15.6"/><path d="M 9.9,7.6 H 18.1 a 2.3,2.3 0 0 1 2.3,2.3 V 17.7 a 2.3,2.3 0 0 1 -2.3,2.3 H 9.9 a 2.3,2.3 0 0 1 -2.3,-2.3 V 9.9 a 2.3,2.3 0 0 1 2.3,-2.3 Z"/></svg>
+        <h3>The same server, at home or on a shelf</h3>
+        <p>Packaged Viora carries its own local server and starts it only after you choose this computer. Server mode is that binary in Docker: it can hold more than one library, and each library can ask for a password. The desktop already speaks that API. A NAS session belongs to the server; the app does not keep the password.</p>
+        <div class="keys"><span class="key">Local</span><span class="key">Docker</span><span class="key">Several libraries</span></div>
+      </article>
+
+      <article class="card reveal">
+        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M4 12h10M4 17h14"/></svg>
+        <h3>Plugins, when the shelf should reach further</h3>
+        <p>Comic indexes, discovery and downloads are plugins, not a list of sites built into the app. With none installed, those shelves stay hidden. Pack one with <code>viora-plugin</code>, install it, and the same library grows. The app does not know a site until a plugin says so.</p>
+        <div class="keys"><span class="key">Sources</span><span class="key">Install on purpose</span></div>
+      </article>
+
+      <article class="card reveal">
+        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M 6.9,2.6 H 17.1 a 2.5,2.5 0 0 1 2.5,2.5 V 18.9 a 2.5,2.5 0 0 1 -2.5,2.5 H 6.9 a 2.5,2.5 0 0 1 -2.5,-2.5 V 5.1 a 2.5,2.5 0 0 1 2.5,-2.5 Z"/><circle cx="12" cy="9.8" r="2.55"/><path d="M 8.2,17.9 C 8.2,14.5 15.8,14.5 15.8,17.9"/></svg>
+        <h3>Recognition, only after you allow it</h3>
+        <p>Tags and people can come from a model pack running on this machine through ONNX Runtime. You install the pack, accept its licence, then turn recognition on. Faces, labels and a few frames from a video stay in the library. Leave it off, and the wall is only what you filed — comic tags included, when the books already have them.</p>
+        <div class="keys"><span class="key">Tags</span><span class="key">People</span><span class="key">On device</span></div>
+      </article>
+
+      <article class="card reveal">
+        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M 5.7,4.8 H 18.3 a 2.5,2.5 0 0 1 2.5,2.5 V 16.7 a 2.5,2.5 0 0 1 -2.5,2.5 H 5.7 a 2.5,2.5 0 0 1 -2.5,-2.5 V 7.3 a 2.5,2.5 0 0 1 2.5,-2.5 Z"/><g stroke-width="1.5"><path d="M 6.6,9.6 H 17.4" opacity=".85"/><path d="M 6.6,12.4 H 15.2" opacity=".55"/><path d="M 6.6,15.2 H 12.6" opacity=".3"/></g></svg>
+        <h3>Privacy on the window</h3>
+        <p>The window can frost when focus leaves, and clear when it returns. That is a local display safeguard. Playback choices and the rest of Preferences stay on this machine, beside the database, thumbnails and models — not inside the app bundle.</p>
+        <div class="keys"><span class="key">Frost</span><span class="key">This machine</span></div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section class="origin" id="origin">
+  <div class="origin-sticky">
+    <div class="origin-inner">
+      <aside class="origin-side">
+        <p class="eyebrow">The mark</p>
+        <ol class="steps" id="steps">
+          <li data-step="0"><span class="n">01</span><span><span class="t">A hardcover waits</span><span class="d">Closed. Gold boards. Ready on the shelf.</span></span></li>
+          <li data-step="1"><span class="n">02</span><span><span class="t">It opens</span><span class="d">The covers swing apart — a library begins.</span></span></li>
+          <li data-step="2"><span class="n">03</span><span><span class="t">Pages turn</span><span class="d">Photo, video, illustration, novel, comic.</span></span></li>
+          <li data-step="3"><span class="n">04</span><span><span class="t">Seen from below</span><span class="d">The open book settles into the letter V.</span></span></li>
+        </ol>
+        <div class="origin-progress" aria-hidden="true"><i id="prog"></i></div>
+      </aside>
+
+      <div class="stage">
+        <div class="book-rig" id="bookRig">
+          <div class="book-3d" id="book3d">
+            <div class="spine" aria-hidden="true"></div>
+            <div class="board left" id="boardL"></div>
+            <div class="board right" id="boardR"><span class="stamp">VIORA</span></div>
+            <div class="leaf left" id="leafL"><div class="endpaper"></div></div>
+            <div class="leaf right" id="leafR">
+              <div class="endpaper"></div>
+              <div class="sheet" data-i="4" style="z-index:1">
+                <div class="recto">
+                  <span class="kicker">Comics</span>
+                  <span class="title">Pages in a book</span>
+                  <div class="art art-comic"></div>
+                  <span class="caption">CBZ and the sources you plug in when you want them.</span>
+                </div>
+                <div class="verso"></div>
+              </div>
+              <div class="sheet" data-i="3" style="z-index:2">
+                <div class="recto">
+                  <span class="kicker">Novels</span>
+                  <span class="title">Long form, quiet</span>
+                  <div class="art art-novel"></div>
+                  <span class="caption">Chapters stay files. Reading stays local.</span>
+                </div>
+                <div class="verso"></div>
+              </div>
+              <div class="sheet" data-i="2" style="z-index:3">
+                <div class="recto">
+                  <span class="kicker">Illustration</span>
+                  <span class="title">Drawn things, hung</span>
+                  <div class="art art-illust"></div>
+                  <span class="caption">Art and stills share one wall.</span>
+                </div>
+                <div class="verso"></div>
+              </div>
+              <div class="sheet" data-i="1" style="z-index:4">
+                <div class="recto">
+                  <span class="kicker">Video</span>
+                  <span class="title">Motion, frame by frame</span>
+                  <div class="art art-video"></div>
+                  <span class="caption">Play the original. Preview without opening it.</span>
+                </div>
+                <div class="verso"></div>
+              </div>
+              <div class="sheet" data-i="0" style="z-index:5">
+                <div class="recto">
+                  <span class="kicker">Photos</span>
+                  <span class="title">A day kept whole</span>
+                  <div class="art art-photo"></div>
+                  <span class="caption">Folders of stills, as you left them on disk.</span>
+                </div>
+                <div class="verso"></div>
+              </div>
+            </div>
+          </div>
+          <svg class="logo-settle" id="logoSettle" viewBox="15.02 40.70 169.95 120.80" aria-hidden="true">
+            <defs>
+              <linearGradient id="gild-settle" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0" stop-color="var(--board-hi)"/>
+                <stop offset="1" stop-color="var(--board-lo)"/>
+              </linearGradient>
+              <clipPath id="sL"><rect x="-200" y="-200" width="300" height="600"/></clipPath>
+              <clipPath id="sR"><rect x="100" y="-200" width="400" height="600"/></clipPath>
+            </defs>
+            <g fill="none" stroke-linejoin="round">
+              <g clip-path="url(#sL)">
+                <path d="M 40.33,43.11 L 97.03,133.85 A 3.5 3.5 0 0 0 102.97,133.85 L 159.67,43.11" stroke="var(--page)" stroke-width="22"/>
+                <path d="M 37.26,48.57 L 92.37,136.77 A 9 9 0 0 0 107.63,136.77" stroke="var(--page-line)" stroke-width="1.6"/>
+                <path d="M 42.34,45.39 L 97.46,133.59 A 3 3 0 0 0 102.54,133.59" stroke="var(--page-line)" stroke-width="1.6"/>
+              </g>
+              <g clip-path="url(#sR)">
+                <path d="M 40.33,43.11 L 97.03,133.85 A 3.5 3.5 0 0 0 102.97,133.85 L 159.67,43.11" stroke="var(--page)" stroke-width="22"/>
+                <path d="M 92.37,136.77 A 9 9 0 0 0 107.63,136.77 L 162.74,48.57" stroke="var(--page-line)" stroke-width="1.6"/>
+                <path d="M 97.46,133.59 A 3 3 0 0 0 102.54,133.59 L 157.66,45.39" stroke="var(--page-line)" stroke-width="1.6"/>
+              </g>
+              <path d="M 100.00,146.50 V 117.85" stroke="var(--gutter)" stroke-width="1.8" stroke-linecap="round"/>
+              <path d="M 23.69,47.62 L 83.04,142.60 A 20 20 0 0 0 116.96,142.60 L 176.31,47.62" stroke="url(#gild-settle)" stroke-width="11"/>
+            </g>
+          </svg>
+        </div>
+        <div class="frame-wordmark" id="wordmark">
+          <div class="wm">Viora</div>
+          <div class="sub">one book &middot; one letter &middot; one library</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section vocab">
+  <div class="wrap">
+    <div class="reveal">
+      <p class="eyebrow">One language</p>
+      <h2 style="font-size:clamp(1.9rem,1.4rem + 2.4vw,3rem); max-width:18ch; margin:.8rem 0 1rem;">The open book is the whole vocabulary.</h2>
+      <p style="color:var(--ink-2); max-width:42ch;">The mark is a hardcover seen from below — gold boards, aged pages, the letter V. Sidebar icons keep the same stroke and corners, so the interface and the logo come from one geometry.</p>
+    </div>
+    <div class="iconwall reveal" aria-hidden="true">
+      <div class="itile" title="Library"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M 4.9,4.2 H 10.5 a 2.3,2.3 0 0 1 2.3,2.3 V 17.3 a 2.3,2.3 0 0 1 -2.3,2.3 H 4.9 a 2.3,2.3 0 0 1 -2.3,-2.3 V 6.5 a 2.3,2.3 0 0 1 2.3,-2.3 Z"/><path d="M 16.7,4.2 H 19.5 a 1.9,1.9 0 0 1 1.9,1.9 V 9.1 a 1.9,1.9 0 0 1 -1.9,1.9 H 16.7 a 1.9,1.9 0 0 1 -1.9,-1.9 V 6.1 a 1.9,1.9 0 0 1 1.9,-1.9 Z"/><path d="M 16.7,12.8 H 19.5 a 1.9,1.9 0 0 1 1.9,1.9 V 17.7 a 1.9,1.9 0 0 1 -1.9,1.9 H 16.7 a 1.9,1.9 0 0 1 -1.9,-1.9 V 14.7 a 1.9,1.9 0 0 1 1.9,-1.9 Z"/></svg></div>
+      <div class="itile" title="Collections"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M 5,3 H 8.8 a 2,2 0 0 1 2,2 V 8.8 a 2,2 0 0 1 -2,2 H 5 a 2,2 0 0 1 -2,-2 V 5 a 2,2 0 0 1 2,-2 Z"/><path d="M 15.2,3 H 19 a 2,2 0 0 1 2,2 V 8.8 a 2,2 0 0 1 -2,2 H 15.2 a 2,2 0 0 1 -2,-2 V 5 a 2,2 0 0 1 2,-2 Z"/><path d="M 5,13.2 H 8.8 a 2,2 0 0 1 2,2 V 19 a 2,2 0 0 1 -2,2 H 5 a 2,2 0 0 1 -2,-2 V 15.2 a 2,2 0 0 1 2,-2 Z"/><path d="M 15.2,13.2 H 19 a 2,2 0 0 1 2,2 V 19 a 2,2 0 0 1 -2,2 H 15.2 a 2,2 0 0 1 -2,-2 V 15.2 a 2,2 0 0 1 2,-2 Z"/></svg></div>
+      <div class="itile" title="Tags"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M 9.0,6.2 H 18.6 a 2.4,2.4 0 0 1 2.4,2.4 V 15.4 a 2.4,2.4 0 0 1 -2.4,2.4 H 9.0 L 3.4,12.8 a 1.2,1.2 0 0 1 0,-1.6 Z"/><circle cx="8.4" cy="12" r="1.3" fill="currentColor" stroke="none"/></svg></div>
+      <div class="itile" title="People"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M 6.9,2.6 H 17.1 a 2.5,2.5 0 0 1 2.5,2.5 V 18.9 a 2.5,2.5 0 0 1 -2.5,2.5 H 6.9 a 2.5,2.5 0 0 1 -2.5,-2.5 V 5.1 a 2.5,2.5 0 0 1 2.5,-2.5 Z"/><circle cx="12" cy="9.8" r="2.55"/><path d="M 8.2,17.9 C 8.2,14.5 15.8,14.5 15.8,17.9"/></svg></div>
+      <div class="itile" title="Folder"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M 3,17.8 V 6.2 a 2.1,2.1 0 0 1 2.1,-2.1 H 9.1 l 2.3,2.5 H 18.9 a 2.1,2.1 0 0 1 2.1,2.1 V 17.8 a 2.1,2.1 0 0 1 -2.1,2.1 H 5.1 a 2.1,2.1 0 0 1 -2.1,-2.1 Z"/></svg></div>
+      <div class="itile" title="Add"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M 5.7,4.8 H 18.3 a 2.5,2.5 0 0 1 2.5,2.5 V 16.7 a 2.5,2.5 0 0 1 -2.5,2.5 H 5.7 a 2.5,2.5 0 0 1 -2.5,-2.5 V 7.3 a 2.5,2.5 0 0 1 2.5,-2.5 Z"/><path d="M 12,8.6 L 12,15.4"/><path d="M 8.6,12 L 15.4,12"/></svg></div>
+      <div class="itile" title="Switch library"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M 4.2,15.6 V 6.4 a 2.2,2.2 0 0 1 2.2,-2.2 H 15.6"/><path d="M 9.9,7.6 H 18.1 a 2.3,2.3 0 0 1 2.3,2.3 V 17.7 a 2.3,2.3 0 0 1 -2.3,2.3 H 9.9 a 2.3,2.3 0 0 1 -2.3,-2.3 V 9.9 a 2.3,2.3 0 0 1 2.3,-2.3 Z"/></svg></div>
+      <div class="itile" title="Privacy"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M 5.7,4.8 H 18.3 a 2.5,2.5 0 0 1 2.5,2.5 V 16.7 a 2.5,2.5 0 0 1 -2.5,2.5 H 5.7 a 2.5,2.5 0 0 1 -2.5,-2.5 V 7.3 a 2.5,2.5 0 0 1 2.5,-2.5 Z"/><g stroke-width="1.5"><path d="M 6.6,9.6 H 17.4" opacity=".85"/><path d="M 6.6,12.4 H 15.2" opacity=".55"/><path d="M 6.6,15.2 H 12.6" opacity=".3"/></g></svg></div>
+    </div>
+  </div>
+</section>
+
+<section class="section download" id="download">
+  <div class="wrap">
+    <div class="dl-card reveal">
+      <svg class="dl-mark" viewBox="15.02 40.70 169.95 120.80" role="img" aria-label="Viora mark">
+        <defs>
+          <linearGradient id="gild-dl" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="var(--board-hi)"/><stop offset="1" stop-color="var(--board-lo)"/>
+          </linearGradient>
+          <clipPath id="dL"><rect x="-200" y="-200" width="300" height="600"/></clipPath>
+          <clipPath id="dR"><rect x="100" y="-200" width="400" height="600"/></clipPath>
+        </defs>
+        <g fill="none" stroke-linejoin="round">
+          <g clip-path="url(#dL)"><path d="M 40.33,43.11 L 97.03,133.85 A 3.5 3.5 0 0 0 102.97,133.85 L 159.67,43.11" stroke="var(--page)" stroke-width="22"/></g>
+          <g clip-path="url(#dR)"><path d="M 40.33,43.11 L 97.03,133.85 A 3.5 3.5 0 0 0 102.97,133.85 L 159.67,43.11" stroke="var(--page)" stroke-width="22"/></g>
+          <path d="M 23.69,47.62 L 83.04,142.60 A 20 20 0 0 0 116.96,142.60 L 176.31,47.62" stroke="url(#gild-dl)" stroke-width="11"/>
+        </g>
+      </svg>
+      <p class="eyebrow">Get Viora</p>
+      <h2>Open the library you already have.</h2>
+      <p style="color:var(--ink-2); max-width:46ch;">The packaged app carries its own local server. Point it at folders on this machine, or connect to a NAS you already run. The installers below are the three desktop builds.</p>
+      <div class="dl-buttons">
+        <a class="btn btn-gold" href="#download-note">
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M16.4 12.7c0-2 1.6-3 1.7-3-.9-1.4-2.4-1.5-2.9-1.6-1.2-.1-2.4.7-3 .7s-1.6-.7-2.6-.7c-1.3 0-2.6.8-3.3 2-1.4 2.4-.4 6 1 8 .7 1 1.4 2 2.4 2s1.3-.6 2.5-.6 1.5.6 2.6.6 1.7-1 2.3-2c.7-1.1 1-2.2 1-2.3 0 0-1.9-.7-2-2.8zM14.6 6.3c.5-.7.9-1.6.8-2.6-.8 0-1.8.6-2.4 1.2-.5.6-1 1.6-.8 2.5.9.1 1.8-.4 2.4-1.1z"/></svg>
+          <span class="plat">macOS<small>Apple Silicon</small></span>
+        </a>
+        <a class="btn btn-ghost" href="#download-note">
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M16.4 12.7c0-2 1.6-3 1.7-3-.9-1.4-2.4-1.5-2.9-1.6-1.2-.1-2.4.7-3 .7s-1.6-.7-2.6-.7c-1.3 0-2.6.8-3.3 2-1.4 2.4-.4 6 1 8 .7 1 1.4 2 2.4 2s1.3-.6 2.5-.6 1.5.6 2.6.6 1.7-1 2.3-2c.7-1.1 1-2.2 1-2.3 0 0-1.9-.7-2-2.8zM14.6 6.3c.5-.7.9-1.6.8-2.6-.8 0-1.8.6-2.4 1.2-.5.6-1 1.6-.8 2.5.9.1 1.8-.4 2.4-1.1z"/></svg>
+          <span class="plat">macOS<small>Intel</small></span>
+        </a>
+        <a class="btn btn-ghost" href="#download-note">
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 5.4l7.3-1v7H3V5.4zM11.3 4.3L21 3v8.4h-9.7V4.3zM3 12.3h7.3v6.9L3 18.2v-5.9zM11.3 12.3H21V21l-9.7-1.3v-7.4z"/></svg>
+          <span class="plat">Windows<small>64-bit</small></span>
+        </a>
+      </div>
+      <p id="download-note" class="hint">Installer links go here when a public build is published. Version 1.0.0, updated 2026.10.2.</p>
+      <div class="specs">
+        <span>Version <b>1.0.0</b></span>
+        <span>Updated <time datetime="2026-10-02">2026.10.2</time></span>
+        <span>Apple Silicon &amp; Intel Macs</span>
+        <span>Windows 10 / 11</span>
+        <span><b>Free</b></span>
+      </div>
+      <div class="trust">
+        <div><span class="ck">&#10003;</span><span>Your media stays on disk. Local mode listens only on this machine.</span></div>
+        <div><span class="ck">&#10003;</span><span>A NAS library uses a session the server owns. The password is not stored in the app.</span></div>
+        <div><span class="ck">&#10003;</span><span>Plugins and model packs install when you ask. Weights download only after you accept a licence.</span></div>
+        <div><span class="ck">&#10003;</span><span>Database, thumbnails and models live in your user folder, not in the app bundle.</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap foot">
+    <div class="mk">
+      <svg viewBox="15.02 40.70 169.95 120.80" role="img" aria-label="Viora">
+        <defs>
+          <linearGradient id="gild-ft" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="var(--board-hi)"/><stop offset="1" stop-color="var(--board-lo)"/>
+          </linearGradient>
+          <clipPath id="fL"><rect x="-200" y="-200" width="300" height="600"/></clipPath>
+          <clipPath id="fR"><rect x="100" y="-200" width="400" height="600"/></clipPath>
+        </defs>
+        <g fill="none" stroke-linejoin="round">
+          <g clip-path="url(#fL)"><path d="M 40.33,43.11 L 97.03,133.85 A 3.5 3.5 0 0 0 102.97,133.85 L 159.67,43.11" stroke="var(--page)" stroke-width="22"/></g>
+          <g clip-path="url(#fR)"><path d="M 40.33,43.11 L 97.03,133.85 A 3.5 3.5 0 0 0 102.97,133.85 L 159.67,43.11" stroke="var(--page)" stroke-width="22"/></g>
+          <path d="M 23.69,47.62 L 83.04,142.60 A 20 20 0 0 0 116.96,142.60 L 176.31,47.62" stroke="url(#gild-ft)" stroke-width="11"/>
+        </g>
+      </svg>
+      Viora
+    </div>
+    <p>A personal media library for photos, video, comics and novels. Desktop client and Go server, on this computer or a NAS.</p>
+    <p class="credit">Viora · © 2026 opencoast.io · https://viora.opencoast.io</p>
+  </div>
+</footer>
+
+<script>
+(function(){
+  "use strict";
+  var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var themeBtn = document.getElementById("theme");
+  function systemDark(){
+    return window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+  }
+  function paintTheme(mode){
+    var root = document.documentElement;
+    if (mode === "light" || mode === "dark") root.setAttribute("data-theme", mode);
+    else root.removeAttribute("data-theme");
+    var dark = mode === "dark" || (mode !== "light" && systemDark());
+    if (themeBtn){
+      themeBtn.textContent = dark ? "Light" : "Dark";
+      themeBtn.setAttribute("aria-pressed", dark ? "true" : "false");
+    }
+  }
+  var stored = "system";
+  try { stored = localStorage.getItem("viora-theme") || "system"; } catch (e) {}
+  paintTheme(stored);
+  if (themeBtn) themeBtn.addEventListener("click", function(){
+    var cur = document.documentElement.getAttribute("data-theme");
+    var next = cur === "dark" ? "light" : "dark";
+    if (!cur) next = systemDark() ? "light" : "dark";
+    try { localStorage.setItem("viora-theme", next); } catch (e) {}
+    paintTheme(next);
+  });
+
+  function clamp(v){ return v < 0 ? 0 : v > 1 ? 1 : v; }
+  function seg(p,a,b){ return clamp((p-a)/(b-a)); }
+  function ease(t){ return t < .5 ? 2*t*t : 1 - Math.pow(-2*t+2, 2)/2; }
+  function easeOut(t){ return 1 - Math.pow(1-t, 3); }
+  function lerp(a,b,t){ return a + (b-a)*t; }
+
+  var book3d = document.getElementById("book3d");
+  var boardL = document.getElementById("boardL");
+  var boardR = document.getElementById("boardR");
+  var leafL = document.getElementById("leafL");
+  var leafR = document.getElementById("leafR");
+  var sheets = Array.prototype.slice.call(document.querySelectorAll(".sheet"))
+    .sort(function(a,b){ return (+a.dataset.i) - (+b.dataset.i); });
+  var logoSettle = document.getElementById("logoSettle");
+  var wordmark = document.getElementById("wordmark");
+  var prog = document.getElementById("prog");
+  var stepEls = Array.prototype.slice.call(document.querySelectorAll("#steps li"));
+  var PAGE_COUNT = sheets.length;
+
+  function apply(p){
+    var openT = ease(seg(p, 0.08, 0.26));
+    var flipZone = seg(p, 0.26, 0.78);
+    var settleT = ease(seg(p, 0.78, 1));
+    var closedL = 178, openL = -16, logoL = -28;
+    var closedR = 2, openR = 16, logoR = 28;
+    var lAng = lerp(lerp(closedL, openL, openT), logoL, settleT);
+    var rAng = lerp(lerp(closedR, openR, openT), logoR, settleT);
+    if (boardL) boardL.style.transform = "rotateY(" + lAng.toFixed(2) + "deg)";
+    if (boardR) boardR.style.transform = "rotateY(" + rAng.toFixed(2) + "deg)";
+    var leafFollow = Math.max(0, openT - 0.04);
+    if (leafL) leafL.style.transform = "rotateY(" + lerp(178, -12, leafFollow).toFixed(2) + "deg) translateZ(1px)";
+    if (leafR) leafR.style.transform = "rotateY(" + lerp(2, 12, leafFollow).toFixed(2) + "deg) translateZ(1px)";
+    var leafOp = clamp((openT - 0.15) / 0.55);
+    var settleFade = 1 - settleT;
+    if (leafL) leafL.style.opacity = (leafOp * settleFade).toFixed(3);
+    if (leafR) leafR.style.opacity = (leafOp * settleFade).toFixed(3);
+    for (var n = 0; n < PAGE_COUNT; n++){
+      var start = n / PAGE_COUNT;
+      var end = (n + 1) / PAGE_COUNT;
+      var local = seg(flipZone, start, end);
+      var flipT = easeOut(seg(local, 0.28, 1));
+      if (flipZone <= 0) flipT = 0;
+      if (flipZone >= 1) flipT = 1;
+      var sheet = sheets[n];
+      if (!sheet) continue;
+      sheet.style.transform = "rotateY(" + (-180 * flipT).toFixed(2) + "deg)";
+      var z = flipT > 0.02 && flipT < 0.98 ? 20 : (flipT >= 0.98 ? 0 : (PAGE_COUNT - n));
+      sheet.style.zIndex = String(z);
+    }
+    var rx = lerp(lerp(12, 6, openT), 68, settleT);
+    var ry = lerp(lerp(-18, 0, openT), 0, settleT);
+    var scale = lerp(1, 0.62, settleT);
+    var ty = lerp(0, 14, settleT);
+    var bookFade = ease(seg(p, 0.84, 0.96));
+    if (book3d){
+      book3d.style.opacity = (1 - bookFade).toFixed(3);
+      book3d.style.transform = "rotateX(" + rx.toFixed(2) + "deg) rotateY(" + ry.toFixed(2) + "deg) translateY(" + ty.toFixed(1) + "%) scale(" + scale.toFixed(3) + ")";
+    }
+    if (logoSettle){
+      var lo = ease(seg(p, 0.82, 0.95));
+      logoSettle.style.opacity = lo.toFixed(3);
+      logoSettle.style.transform = "translate(-50%,-48%) scale(" + lerp(0.78, 1, lo).toFixed(3) + ")";
+    }
+    if (wordmark) wordmark.style.opacity = ease(seg(p, 0.9, 1)).toFixed(3);
+    if (prog) prog.style.width = (p * 100).toFixed(1) + "%";
+    var active = p < 0.08 ? 0 : p < 0.26 ? 1 : p < 0.78 ? 2 : 3;
+    for (var i = 0; i < stepEls.length; i++) stepEls[i].classList.toggle("on", i === active);
+  }
+
+  var origin = document.getElementById("origin");
+  function compute(){
+    if (!origin) return;
+    var rect = origin.getBoundingClientRect();
+    var span = rect.height - window.innerHeight;
+    var p = span > 0 ? clamp(-rect.top / span) : (rect.top <= 0 ? 1 : 0);
+    apply(p);
+  }
+  var ticking = false;
+  function onScroll(){
+    if (ticking) return;
+    ticking = true;
+    requestAnimationFrame(function(){ ticking = false; compute(); });
+  }
+  if (reduce){
+    apply(1);
+    if (prog) prog.style.width = "100%";
+    for (var i = 0; i < stepEls.length; i++) stepEls[i].classList.add("on");
+  } else {
+    apply(0);
+    window.addEventListener("scroll", onScroll, {passive:true});
+    window.addEventListener("resize", onScroll);
+    compute();
+  }
+
+  var reveals = document.querySelectorAll(".reveal");
+  if (reduce || !("IntersectionObserver" in window)){
+    reveals.forEach(function(el){ el.classList.add("in"); });
+  } else {
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(e){
+        if (e.isIntersecting){ e.target.classList.add("in"); io.unobserve(e.target); }
+      });
+    }, {rootMargin:"0px 0px -8% 0px", threshold:.08});
+    reveals.forEach(function(el){ io.observe(el); });
+  }
+
+  document.querySelectorAll('a[href^="#"]').forEach(function(a){
+    a.addEventListener("click", function(ev){
+      var id = a.getAttribute("href");
+      if (!id || id.length < 2) return;
+      var el = document.querySelector(id);
+      if (!el) return;
+      ev.preventDefault();
+      el.scrollIntoView({behavior: reduce ? "auto" : "smooth", block: "start"});
+    });
+  });
+})();
+
+(function(){
+  "use strict";
+  var stage = document.getElementById("window");
+  var win = document.getElementById("uiWindow");
+  var grid = document.getElementById("uiGrid");
+  var recent = document.getElementById("uiRecent");
+  var body = document.getElementById("uiBody");
+  var cursor = document.getElementById("uiCursor");
+  var caption = document.getElementById("uiCaption");
+  var search = document.getElementById("uiSearch");
+  var viewer = document.getElementById("uiViewer");
+  var viewerArt = document.getElementById("uiViewerArt");
+  var viewerName = document.getElementById("uiViewerName");
+  var film = document.getElementById("uiFilm");
+  if (!stage || !win || !grid || !recent || !body) return;
+
+  var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var items = [
+    { id:"north", name:"North window", kind:"photo", meta:"Photo", art:"pic-north", nameOrder:"0", date:"4", size:"2" },
+    { id:"dusk", name:"Dusk road", kind:"video", meta:"Video · 2:14", art:"pic-dusk", nameOrder:"1", date:"1", size:"6" },
+    { id:"harbour", name:"Harbour", kind:"photo", meta:"Photo", art:"pic-harbour", nameOrder:"2", date:"3", size:"1" },
+    { id:"chapter", name:"Chapter twelve", kind:"comic", meta:"Comic · 42 pages", art:"pic-chapter", nameOrder:"3", date:"2", size:"4" },
+    { id:"quiet", name:"The quiet house", kind:"novel", meta:"Novel", art:"pic-quiet", nameOrder:"4", date:"5", size:"3" },
+    { id:"kitchen", name:"Kitchen light", kind:"photo", meta:"Photo", art:"pic-kitchen", nameOrder:"5", date:"6", size:"2" }
+  ];
+  var beats = {
+    hover: "Rest on a video. The next frames play on the card, so you never open it just to look.",
+    recent: "What you opened last sits under the title. One click continues, and the wall is still underneath.",
+    sort: "Name, date or size. The same wall rearranges, and you do not leave the folder.",
+    search: "Type in the bar. The rest of the wall steps aside, and clearing the word brings it back."
+  };
+
+  function thumb(item, video){
+    var badge = item.kind === "video" ? '<span class="ui-badge">VIDEO</span>' : item.kind === "comic" ? '<span class="ui-badge comic">CBZ</span>' : "";
+    var frames = video ? '<span class="ui-frames" aria-hidden="true"><i class="pic-dusk"></i><i class="pic-dusk-2"></i><i class="pic-dusk-3"></i></span><span class="ui-vtags" aria-hidden="true">evening · road</span><span class="ui-vtime" aria-hidden="true">0:04</span><span class="ui-progress" aria-hidden="true"><b></b></span>' : "";
+    return '<span class="ui-thumb"><span class="pic ' + item.art + '"></span>' + frames + badge + "</span>";
+  }
+  function itemById(id){
+    for (var i = 0; i < items.length; i++) if (items[i].id === id) return items[i];
+    return items[0];
+  }
+  function tileEl(id){ return grid.querySelector('[data-id="' + id + '"]'); }
+
+  items.forEach(function(item){
+    var btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "ui-tile" + (item.kind === "video" ? " is-video" : "");
+    btn.dataset.id = item.id;
+    btn.dataset.name = item.name.toLowerCase();
+    btn.dataset.nameOrder = item.nameOrder;
+    btn.dataset.date = item.date;
+    btn.dataset.size = item.size;
+    btn.innerHTML = thumb(item, item.kind === "video") + '<span class="ui-cap"><strong></strong><small></small></span>';
+    btn.querySelector("strong").textContent = item.name;
+    btn.querySelector("small").textContent = item.meta;
+    btn.addEventListener("click", function(){ openViewer(item.id); });
+    grid.appendChild(btn);
+  });
+  items.slice(0, 4).forEach(function(item){
+    var btn = document.createElement("button");
+    btn.type = "button";
+    btn.dataset.id = item.id;
+    btn.innerHTML = '<span class="thumb"><span class="pic ' + item.art + '"></span></span><em></em>';
+    btn.querySelector("em").textContent = item.name;
+    btn.addEventListener("click", function(){ openViewer(item.id); });
+    recent.appendChild(btn);
+  });
+
+  function flip(apply){
+    var tiles = [].slice.call(grid.children);
+    var first = tiles.map(function(el){
+      return { el: el, r: el.getBoundingClientRect(), hidden: el.classList.contains("out") };
+    });
+    apply();
+    first.forEach(function(item){
+      if (item.hidden || item.el.classList.contains("out")) return;
+      var next = item.el.getBoundingClientRect();
+      var dx = item.r.left - next.left;
+      var dy = item.r.top - next.top;
+      if (Math.abs(dx) < 1 && Math.abs(dy) < 1) return;
+      item.el.animate(
+        [{ transform: "translate(" + dx + "px," + dy + "px)" }, { transform: "none" }],
+        { duration: reduce ? 0 : 480, easing: "cubic-bezier(.2,.7,.2,1)" }
+      );
+    });
+  }
+  function setSort(key){
+    var field = key === "name" ? "nameOrder" : key;
+    flip(function(){
+      [].slice.call(grid.children).forEach(function(el){ el.style.order = el.dataset[field]; });
+      [].slice.call(win.querySelectorAll(".ui-sort button")).forEach(function(b){
+        b.classList.toggle("on", b.dataset.sort === key);
+      });
+    });
+  }
+  function applyFilter(){
+    var q = (search.value || "").trim().toLowerCase();
+    flip(function(){
+      [].slice.call(grid.children).forEach(function(el){
+        el.classList.toggle("out", q.length > 0 && el.dataset.name.indexOf(q) === -1);
+      });
+    });
+  }
+  win.querySelectorAll(".ui-sort button").forEach(function(b){
+    b.addEventListener("click", function(){ setSort(b.dataset.sort); });
+  });
+  search.addEventListener("input", applyFilter);
+
+  function paintViewer(id){
+    var item = itemById(id);
+    viewerName.textContent = item.name;
+    viewerArt.innerHTML = '<span class="pic ' + item.art + '"></span>';
+    film.innerHTML = "";
+    items.forEach(function(it){
+      var b = document.createElement("button");
+      b.type = "button";
+      if (it.id === id) b.className = "on";
+      b.innerHTML = '<span class="thumb"><span class="pic ' + it.art + '"></span></span>';
+      b.addEventListener("click", function(){ paintViewer(it.id); });
+      film.appendChild(b);
+    });
+    viewer.classList.add("open");
+    [].slice.call(recent.children).forEach(function(b){ b.classList.toggle("on", b.dataset.id === id); });
+  }
+  function openViewer(id){ paintViewer(id); }
+  function closeViewer(){
+    viewer.classList.remove("open");
+    [].slice.call(recent.children).forEach(function(b){ b.classList.remove("on"); });
+  }
+  document.getElementById("uiBack").addEventListener("click", closeViewer);
+
+  function setBeat(name){
+    [].slice.call(stage.querySelectorAll(".ui-beats button")).forEach(function(b){
+      b.classList.toggle("on", b.dataset.beat === name);
+    });
+    if (caption) caption.textContent = beats[name] || "";
+  }
+
+  var reelTimer = 0;
+  var reelLock = null;
+  function reel(on, who){
+    var tile = tileEl("dusk");
+    if (!tile) return;
+    if (on){
+      if (reelLock === who && tile.classList.contains("reel")) return;
+      reelLock = who;
+    } else if (reelLock === who) reelLock = null;
+    else return;
+    var show = !!reelLock;
+    window.clearInterval(reelTimer);
+    tile.classList.toggle("reel", show);
+    var frames = [].slice.call(tile.querySelectorAll(".ui-frames i"));
+    var bar = tile.querySelector(".ui-progress b");
+    var time = tile.querySelector(".ui-vtime");
+    var clocks = ["0:04", "0:18", "0:41"];
+    var i = 0;
+    function step(){
+      frames.forEach(function(frame, n){ frame.classList.toggle("on", n === i); });
+      if (bar) bar.style.width = ((i + 1) / frames.length * 100) + "%";
+      if (time) time.textContent = clocks[i] || "";
+      i = (i + 1) % frames.length;
+    }
+    if (!show){
+      frames.forEach(function(frame){ frame.classList.remove("on"); });
+      if (bar) bar.style.width = "0";
+      return;
+    }
+    step();
+    if (!reduce) reelTimer = window.setInterval(step, 840);
+  }
+  grid.addEventListener("pointerover", function(ev){
+    var tile = ev.target.closest && ev.target.closest(".is-video");
+    if (tile) reel(true, "user");
+  });
+  grid.addEventListener("pointerout", function(ev){
+    var tile = ev.target.closest && ev.target.closest(".is-video");
+    if (!tile) return;
+    var next = ev.relatedTarget && ev.relatedTarget.closest && ev.relatedTarget.closest(".is-video");
+    if (next) return;
+    reel(false, "user");
+  });
+
+  function moveCursor(el){
+    if (!cursor || reduce || !el) return Promise.resolve();
+    var before = body.getBoundingClientRect();
+    var er = el.getBoundingClientRect();
+    if (er.top < before.top + 8) body.scrollTop -= before.top - er.top + 12;
+    else if (er.bottom > before.bottom - 8) body.scrollTop += er.bottom - before.bottom + 12;
+    var br = body.getBoundingClientRect();
+    var r = el.getBoundingClientRect();
+    cursor.style.left = (r.left - br.left + body.scrollLeft + r.width / 2) + "px";
+    cursor.style.top = (r.top - br.top + body.scrollTop + Math.min(28, r.height / 2)) + "px";
+    cursor.classList.add("show");
+    return new Promise(function(res){ window.setTimeout(res, 700); });
+  }
+  function clickCursor(){
+    if (!cursor || reduce) return Promise.resolve();
+    cursor.classList.add("down");
+    return new Promise(function(res){
+      window.setTimeout(function(){ cursor.classList.remove("down"); res(); }, 140);
+    });
+  }
+  function wait(ms, token){
+    return new Promise(function(res, rej){
+      window.setTimeout(function(){
+        if (token !== gen) rej(new Error("cancel"));
+        else res();
+      }, reduce ? 0 : ms);
+    });
+  }
+
+  var gen = 0;
+  var hovering = false;
+  var onScreen = false;
+  var resumeTimer = 0;
+  function stop(){
+    gen += 1;
+    window.clearInterval(reelTimer);
+    window.clearTimeout(resumeTimer);
+    reel(false, "tour");
+    if (cursor) cursor.classList.remove("show");
+  }
+  async function runBeat(name, token){
+    setBeat(name);
+    if (name === "hover"){
+      closeViewer();
+      search.value = "";
+      applyFilter();
+      await moveCursor(tileEl("dusk"));
+      if (token !== gen) return;
+      reel(true, "tour");
+      await wait(2500, token);
+      reel(false, "tour");
+    } else if (name === "recent"){
+      reel(false, "tour");
+      var btn = recent.querySelector("button");
+      await moveCursor(btn);
+      if (token !== gen) return;
+      await clickCursor();
+      openViewer(btn.dataset.id);
+      await wait(1400, token);
+      var next = film.querySelectorAll("button")[1];
+      await moveCursor(next);
+      if (token !== gen) return;
+      await clickCursor();
+      paintViewer(items[1].id);
+      await wait(1100, token);
+      closeViewer();
+    } else if (name === "sort"){
+      closeViewer();
+      var dateBtn = win.querySelector('[data-sort="date"]');
+      await moveCursor(dateBtn);
+      if (token !== gen) return;
+      await clickCursor();
+      setSort("date");
+      await wait(1200, token);
+      var nameBtn = win.querySelector('[data-sort="name"]');
+      await moveCursor(nameBtn);
+      if (token !== gen) return;
+      await clickCursor();
+      setSort("name");
+    } else if (name === "search"){
+      closeViewer();
+      setSort("name");
+      await moveCursor(search);
+      if (token !== gen) return;
+      var word = "dusk";
+      search.value = "";
+      for (var i = 1; i <= word.length; i++){
+        search.value = word.slice(0, i);
+        applyFilter();
+        await wait(160, token);
+      }
+      await wait(900, token);
+      search.value = "";
+      applyFilter();
+    }
+  }
+  var order = ["hover", "recent", "sort", "search"];
+  async function loop(token){
+    var n = 0;
+    while (token === gen){
+      await runBeat(order[n % order.length], token);
+      await wait(600, token);
+      n += 1;
+    }
+  }
+  function start(){
+    if (reduce || hovering || !onScreen) return;
+    stop();
+    var token = gen;
+    loop(token).catch(function(){});
+  }
+  stage.addEventListener("pointerenter", function(){
+    hovering = true;
+    stop();
+  });
+  stage.addEventListener("pointerleave", function(){
+    hovering = false;
+    window.clearTimeout(resumeTimer);
+    resumeTimer = window.setTimeout(start, 900);
+  });
+  [].slice.call(stage.querySelectorAll(".ui-beats button")).forEach(function(b){
+    b.addEventListener("click", function(){
+      stop();
+      hovering = true;
+      var token = gen;
+      runBeat(b.dataset.beat, token).catch(function(){});
+    });
+  });
+  if ("IntersectionObserver" in window){
+    var watch = new IntersectionObserver(function(entries){
+      onScreen = entries.some(function(e){ return e.isIntersecting; });
+      if (onScreen) start();
+      else stop();
+    }, { threshold: 0.45 });
+    watch.observe(win);
+  } else if (!reduce){
+    onScreen = true;
+    start();
+  }
+})();
+</script>
+</body>
+</html>
