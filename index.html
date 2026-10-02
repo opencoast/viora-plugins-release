@@ -1020,6 +1020,61 @@ footer{padding:clamp(2.5rem,6vh,4rem) 0; border-top:1px solid var(--line); backg
 <script>
 (function(){
   "use strict";
+  // Apple Silicon stays gold in the markup for a browser with no script. A
+  // real visit moves that class onto the button for this machine.
+  function gpuName(){
+    try {
+      var canvas = document.createElement("canvas");
+      var gl = canvas.getContext("webgl");
+      if (!gl) return "";
+      var ext = gl.getExtension("WEBGL_debug_renderer_info");
+      return ext ? String(gl.getParameter(ext.UNMASKED_RENDERER_WEBGL) || "") : "";
+    } catch (e) { return ""; }
+  }
+  function macDownload(architecture){
+    var arch = String(architecture || "").toLowerCase();
+    if (arch === "arm") return "darwin-arm64";
+    if (arch === "x86") return "darwin-x64";
+    var gpu = gpuName();
+    if (/Apple\s*M\d|Apple GPU/i.test(gpu)) return "darwin-arm64";
+    if (/Intel/i.test(gpu)) return "darwin-x64";
+    return "darwin-arm64";
+  }
+  function detectDownload(){
+    var ua = navigator.userAgent || "";
+    var platform = navigator.platform || "";
+    var hints = navigator.userAgentData;
+    if (/Windows|Win32|Win64/i.test(ua) || /Win/i.test(platform) || (hints && hints.platform === "Windows")) {
+      return Promise.resolve("windows-x64");
+    }
+    var mac = /Mac/i.test(platform) || /Macintosh|Mac OS X/i.test(ua) || (hints && hints.platform === "macOS");
+    if (!mac) return Promise.resolve("");
+    if (hints && hints.getHighEntropyValues) {
+      return hints.getHighEntropyValues(["architecture"]).then(function(data){
+        return macDownload(data && data.architecture);
+      }).catch(function(){ return macDownload(""); });
+    }
+    return Promise.resolve(macDownload(""));
+  }
+  function highlightDownload(){
+    var buttons = document.querySelectorAll(".dl-buttons [data-release]");
+    if (!buttons.length) return;
+    detectDownload().then(function(key){
+      if (!key) return;
+      var found = false;
+      for (var i = 0; i < buttons.length; i++) {
+        if (buttons[i].getAttribute("data-release") === key) found = true;
+      }
+      if (!found) return;
+      for (var j = 0; j < buttons.length; j++) {
+        var on = buttons[j].getAttribute("data-release") === key;
+        buttons[j].classList.toggle("btn-gold", on);
+        buttons[j].classList.toggle("btn-ghost", !on);
+      }
+    });
+  }
+  highlightDownload();
+
   var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   var themeBtn = document.getElementById("theme");
   function systemDark(){
