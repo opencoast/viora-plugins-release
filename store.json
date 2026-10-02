@@ -9,7 +9,7 @@
       "kind": "models",
       "author": "Viora",
       "apiVersion": 1,
-      "url": "https://github.com/opencoast/viora-plugins-release/releases/download/viora-recognition-v1.0.0/viora-recognition.vplugin",
+      "url": "https://github.com/opencoast/viora-release/releases/download/viora-recognition-v1.0.0/viora-recognition.vplugin",
       "sha256": "921043cd9000298e5a52d22c89ba265582c6361f5eae6d505cf076e040ba8e04",
       "size": 495592,
       "viora": "\u003e=1.0.0"
@@ -21,7 +21,7 @@
       "kind": "source",
       "author": "MattX",
       "apiVersion": 1,
-      "url": "https://github.com/opencoast/viora-plugins-release/releases/download/doujin-galleries-v1.0.8/doujin-galleries.vplugin",
+      "url": "https://github.com/opencoast/viora-release/releases/download/doujin-galleries-v1.0.8/doujin-galleries.vplugin",
       "sha256": "aa3ddc1de9121cbcba77813bc3137a8dd505144e872a0bee19ffc4279cd73f0f",
       "size": 12273358,
       "viora": "\u003e=1.0.0"
