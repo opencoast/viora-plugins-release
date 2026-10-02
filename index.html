@@ -599,7 +599,7 @@ footer{padding:clamp(2.5rem,6vh,4rem) 0; border-top:1px solid var(--line); backg
       </svg>
       Viora
     </a>
-    <span class="ver">v1.0.0 <time datetime="2026-10-02">2026.10.2</time></span>
+    <span class="ver" data-release-stamp>v1.0.0 <time datetime="2026-10-02">2026.10.2</time></span>
     </div>
     <div class="nav-links">
       <a href="#highlights">Highlights</a>
@@ -621,7 +621,7 @@ footer{padding:clamp(2.5rem,6vh,4rem) 0; border-top:1px solid var(--line); backg
         <a class="btn btn-gold" href="#download">Download Viora</a>
         <a class="btn btn-ghost" href="#features">Core features</a>
       </div>
-      <span class="hint">Free &middot; v1.0.0 &middot; updated 2026.10.2 &middot; Apple Silicon &middot; Intel &middot; Windows</span>
+      <span class="hint" data-release-summary>Free &middot; v1.0.0 &middot; updated 2026.10.2 &middot; Apple Silicon &middot; Intel &middot; Windows</span>
     </div>
     <div class="hero-art">
       <div class="plate">
@@ -962,23 +962,23 @@ footer{padding:clamp(2.5rem,6vh,4rem) 0; border-top:1px solid var(--line); backg
       <h2>Open the library you already have.</h2>
       <p style="color:var(--ink-2); max-width:46ch;">The packaged app carries its own local server. Point it at folders on this machine, or connect to a NAS you already run. The installers below are the three desktop builds.</p>
       <div class="dl-buttons">
-        <a class="btn btn-gold" href="#download-note">
+        <a class="btn btn-gold" data-release="darwin-arm64" href="https://github.com/opencoast/viora-release/releases/download/viora-v1.0.0-build.8/Viora-1.0.0-build.8-mac-arm64.zip">
           <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M16.4 12.7c0-2 1.6-3 1.7-3-.9-1.4-2.4-1.5-2.9-1.6-1.2-.1-2.4.7-3 .7s-1.6-.7-2.6-.7c-1.3 0-2.6.8-3.3 2-1.4 2.4-.4 6 1 8 .7 1 1.4 2 2.4 2s1.3-.6 2.5-.6 1.5.6 2.6.6 1.7-1 2.3-2c.7-1.1 1-2.2 1-2.3 0 0-1.9-.7-2-2.8zM14.6 6.3c.5-.7.9-1.6.8-2.6-.8 0-1.8.6-2.4 1.2-.5.6-1 1.6-.8 2.5.9.1 1.8-.4 2.4-1.1z"/></svg>
           <span class="plat">macOS<small>Apple Silicon</small></span>
         </a>
-        <a class="btn btn-ghost" href="#download-note">
+        <a class="btn btn-ghost" data-release="darwin-x64" href="#download-note">
           <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M16.4 12.7c0-2 1.6-3 1.7-3-.9-1.4-2.4-1.5-2.9-1.6-1.2-.1-2.4.7-3 .7s-1.6-.7-2.6-.7c-1.3 0-2.6.8-3.3 2-1.4 2.4-.4 6 1 8 .7 1 1.4 2 2.4 2s1.3-.6 2.5-.6 1.5.6 2.6.6 1.7-1 2.3-2c.7-1.1 1-2.2 1-2.3 0 0-1.9-.7-2-2.8zM14.6 6.3c.5-.7.9-1.6.8-2.6-.8 0-1.8.6-2.4 1.2-.5.6-1 1.6-.8 2.5.9.1 1.8-.4 2.4-1.1z"/></svg>
           <span class="plat">macOS<small>Intel</small></span>
         </a>
-        <a class="btn btn-ghost" href="#download-note">
+        <a class="btn btn-ghost" data-release="windows-x64" href="#download-note">
           <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 5.4l7.3-1v7H3V5.4zM11.3 4.3L21 3v8.4h-9.7V4.3zM3 12.3h7.3v6.9L3 18.2v-5.9zM11.3 12.3H21V21l-9.7-1.3v-7.4z"/></svg>
           <span class="plat">Windows<small>64-bit</small></span>
         </a>
       </div>
-      <p id="download-note" class="hint">Installer links go here when a public build is published. Version 1.0.0, updated 2026.10.2.</p>
+      <p id="download-note" class="hint">Version 1.0.0, updated 2026.10.2.</p>
       <div class="specs">
-        <span>Version <b>1.0.0</b></span>
-        <span>Updated <time datetime="2026-10-02">2026.10.2</time></span>
+        <span>Version <b data-release-version>1.0.0</b></span>
+        <span>Updated <time data-release-date datetime="2026-10-02">2026.10.2</time></span>
         <span>Apple Silicon &amp; Intel Macs</span>
         <span>Windows 10 / 11</span>
         <span><b>Free</b></span>

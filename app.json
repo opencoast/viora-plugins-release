@@ -1,5 +1,19 @@
 {
   "version": "1.0.0",
   "released": "2026-10-02",
-  "packages": []
+  "packages": [
+    {
+      "os": "darwin",
+      "arch": "arm64",
+      "build": 8,
+      "file": "Viora-1.0.0-build.8-mac-arm64.zip",
+      "url": "https://github.com/opencoast/viora-release/releases/download/viora-v1.0.0-build.8/Viora-1.0.0-build.8-mac-arm64.zip",
+      "sha256": "732b5c72b7113b8da94ce8063432114e5f63192bbfedcc751d320097c1d3d702",
+      "size": 141446797,
+      "appSha256": "9d316df50f805da9aea88a4d9b3a4134496e2185364b81dbd7a9304defdf6247"
+    }
+  ],
+  "official": [
+    "9d316df50f805da9aea88a4d9b3a4134496e2185364b81dbd7a9304defdf6247"
+  ]
 }
