@@ -17,13 +17,14 @@
     {
       "id": "doujin-galleries",
       "name": "Doujin galleries",
-      "version": "1.0.8",
+      "version": "1.0.9",
       "kind": "source",
+      "summary": "Looks up books, artists and new works from gallery sites, and fills in a profile for someone you have already linked.",
       "author": "MattX",
       "apiVersion": 1,
-      "url": "https://github.com/opencoast/viora-release/releases/download/doujin-galleries-v1.0.8/doujin-galleries.vplugin",
-      "sha256": "aa3ddc1de9121cbcba77813bc3137a8dd505144e872a0bee19ffc4279cd73f0f",
-      "size": 12273358,
+      "url": "https://github.com/opencoast/viora-release/releases/download/doujin-galleries-v1.0.9/doujin-galleries.vplugin",
+      "sha256": "6efb0024182ab61dc0fae6885ba047d8892382e63ad61716de06a86ecb83ae2b",
+      "size": 12279382,
       "viora": "\u003e=1.0.0"
     }
   ]
